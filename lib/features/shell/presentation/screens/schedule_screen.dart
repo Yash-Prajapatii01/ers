@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/app_colors.dart';
 
@@ -11,29 +12,37 @@ class ScheduleScreen extends StatelessWidget {
       backgroundColor: AppColors.white,
       body: Center(
         child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 350,
-                height: 310,
-                child: Image.asset(
-                  'assets/images/dashboard/schedule_nodata.png',
-                  fit: BoxFit.cover,
-                ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 350,
+              height: 310,
+              child: Image.asset(
+                'assets/images/dashboard/schedule_nodata.png',
+                fit: BoxFit.cover,
               ),
-              SizedBox(height: 17),
-              Text(
-                'No Data to Display',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Color.fromRGBO(51, 51, 51, 1),
-                ),
+            ),
+            SizedBox(height: 17),
+            Text(
+              'No Data to Display',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Color.fromRGBO(51, 51, 51, 1),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.push('/booking_form');
+        },
+        backgroundColor: Color.fromRGBO(28, 121, 212, 1),
+        shape: CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-
   }
 }

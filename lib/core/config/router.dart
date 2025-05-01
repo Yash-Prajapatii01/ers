@@ -1,3 +1,4 @@
+import 'package:ers_linux/features/scheduling/presentation/screens/booking.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -58,6 +59,10 @@ class AppRouter {
       GoRoute(
         path: VerificationScreen.routePath,
         builder: (context, state) => VerificationScreen(),
+      ),
+      GoRoute(
+        path: BookingForm.routePath,
+        builder: (context, state) => const BookingForm(),
       ),
     ],
     errorBuilder:

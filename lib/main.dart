@@ -1,10 +1,10 @@
+import 'package:ers_linux/features/auth/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'core/config/injection.dart';
 import 'core/config/router.dart';
 import 'shared/theme/theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -21,6 +21,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   await configureDependencies();
+  // setupLocator();
   runApp(const MyApp());
 }
 
@@ -37,7 +38,10 @@ class MyApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider<AuthenticationBloc>(
-              create: (_) => AuthenticationBloc() 
+              create:
+                  (_) => AuthenticationBloc(
+                    supabaseClient: getIt<SupabaseClient>(),
+                  ),
               // why we were using the getIt<AuthenticationBloc>(),
             ),
           ],

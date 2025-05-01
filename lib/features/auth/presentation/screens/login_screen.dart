@@ -1,8 +1,10 @@
+import 'package:ers_linux/features/auth/injection.dart';
 import 'package:ers_linux/features/auth/presentation/screens/single_sign_on.dart';
 import 'package:ers_linux/features/auth/presentation/screens/two_factor_authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../shell/presentation/screens/dashboard_screen.dart';
@@ -26,7 +28,11 @@ class LoginScreen extends StatelessWidget {
     final passwordController = TextEditingController();
 
     return BlocProvider(
-      create: (_) => AuthenticationBloc(initialState: const LoginFormState()),
+      create:
+          (_) => AuthenticationBloc(
+            supabaseClient: getIt<SupabaseClient>(),
+            initialState: const LoginFormState(),
+          ),
       child: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
@@ -142,18 +148,21 @@ class LoginScreen extends StatelessWidget {
                         //   },
                         // ),
                         ButtonCustom(
-                          onPressed: formState.isFormFilled
-                              ? () => context.read<AuthenticationBloc>().add(
-                            LoginSubmitted(
-                              loginController.text.trim(),
-                              passwordController.text.trim(),
-                            ),
-                          )
-                              : null,
+                          onPressed:
+                              formState.isFormFilled
+                                  ? () =>
+                                      context.read<AuthenticationBloc>().add(
+                                        LoginSubmitted(
+                                          loginController.text.trim(),
+                                          passwordController.text.trim(),
+                                        ),
+                                      )
+                                  : null,
                           text: "Login",
-                          backgroundColor: formState.isFormFilled
-                              ?  AppColors.buttonActive
-                              :  AppColors.buttonDisable,
+                          backgroundColor:
+                              formState.isFormFilled
+                                  ? AppColors.buttonActive
+                                  : AppColors.buttonDisable,
                         ),
                         SizedBox(height: AppConstants.height(20)),
                         ButtonCustom(

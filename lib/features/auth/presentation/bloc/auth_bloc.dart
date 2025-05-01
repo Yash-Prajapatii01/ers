@@ -5,6 +5,7 @@ import 'package:ers_linux/features/auth/presentation/screens/otp_verification.da
 import 'package:ers_linux/features/auth/presentation/screens/set_new_password.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,9 +13,11 @@ part 'auth_event.dart';
 
 part 'auth_state.dart';
 
+@injectable
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
-  AuthenticationBloc({AuthenticationState? initialState})
+  final SupabaseClient supabaseClient;
+  AuthenticationBloc({required this.supabaseClient, @factoryParam AuthenticationState? initialState})
     : super(initialState ?? const LoginFormState()) {
     on<LoginFieldChanged>((event, emit) {
       if (state is LoginFormState) {
@@ -32,14 +35,13 @@ class AuthenticationBloc
       emit(const LoginFormState(login: '', password: '', errorMessage: null));
 
       try {
-        final supabase = Supabase.instance.client;
-        final res = await supabase.auth.signInWithPassword(
+        final res = await supabaseClient.auth.signInWithPassword(
           email: event.login,
           password: event.password,
         );
 
         if (res.user != null) {
-          final session = supabase.auth.currentSession;
+          final session = supabaseClient.auth.currentSession;
           final token = session?.accessToken;
           if (token == null) {
             throw Exception('User is not authenticated.');
@@ -63,14 +65,14 @@ class AuthenticationBloc
             debugPrint('[❌] Status ${delres.statusCode}: ${body}');
             throw Exception('Failed to delete unverified TOTP factors.');
           }
-          final factors = await supabase.auth.mfa.listFactors();
+          final factors = await supabaseClient.auth.mfa.listFactors();
 
           if (factors.all.isNotEmpty) {
             ///////////////////////////////
             final userId = res.user!.id;
 
             final response =
-                await supabase
+                await supabaseClient
                     .from('mfa_skip')
                     .select('skip_until')
                     .eq('user_id', userId)
@@ -90,7 +92,7 @@ class AuthenticationBloc
                 return;
               } else {
                 try {
-                  final deleteResult = await Supabase.instance.client
+                  final deleteResult = await supabaseClient
                       .from('mfa_skip')
                       .delete()
                       .eq('user_id', userId);
@@ -160,10 +162,8 @@ class AuthenticationBloc
             : ForgotPasswordState(email: currentEmail),
       );
 
-      final supabase = Supabase.instance.client;
-
       try {
-        final res = await supabase.functions.invoke(
+        final res = await supabaseClient.functions.invoke(
           'check-user-exists',
           body: {"email": currentEmail},
         );
@@ -227,8 +227,7 @@ class AuthenticationBloc
             : ForgotLoginIdState(email: currentEmail),
       );
     });
-        //------------------->fogot login id Bloc end <-------------------
-
+    //------------------->fogot login id Bloc end <-------------------
 
     //------------------->OTP Verification Bloc start <-------------------
     on<OtpFieldChanged>(_onOtpFieldChanged);
@@ -237,7 +236,10 @@ class AuthenticationBloc
     //------------------->OTP Verification Bloc End<-------------------
   }
 
-  void _onOtpFieldChanged(OtpFieldChanged event, Emitter<AuthenticationState> emit) {
+  void _onOtpFieldChanged(
+    OtpFieldChanged event,
+    Emitter<AuthenticationState> emit,
+  ) {
     if (state is OtpVerificationState) {
       emit(
         (state as OtpVerificationState).copyWith(
@@ -249,7 +251,10 @@ class AuthenticationBloc
     }
   }
 
-  Future<void> _onOtpSubmitted(OtpSubmitted event, Emitter<AuthenticationState> emit) async {
+  Future<void> _onOtpSubmitted(
+    OtpSubmitted event,
+    Emitter<AuthenticationState> emit,
+  ) async {
     // kick off a loading state
     emit(
       OtpVerificationState(
@@ -260,7 +265,7 @@ class AuthenticationBloc
     );
 
     try {
-      final res = await Supabase.instance.client.auth.verifyOTP(
+      final res = await supabaseClient.auth.verifyOTP(
         type: OtpType.email,
         token: event.otp,
         email: event.email,
@@ -296,7 +301,10 @@ class AuthenticationBloc
     }
   }
 
-  Future<void> _onOtpResendPressed(OtpResendPressed event, Emitter<AuthenticationState> emit) async {
+  Future<void> _onOtpResendPressed(
+    OtpResendPressed event,
+    Emitter<AuthenticationState> emit,
+  ) async {
     if (state is! OtpVerificationState) return;
 
     // show loading again
@@ -308,8 +316,7 @@ class AuthenticationBloc
     );
 
     try {
-      await Supabase.instance.client.auth.resetPasswordForEmail(
-        event.email,      );
+      await supabaseClient.auth.resetPasswordForEmail(event.email);
       emit(
         (state as OtpVerificationState).copyWith(
           status: OtpVerificationStatus.resent,

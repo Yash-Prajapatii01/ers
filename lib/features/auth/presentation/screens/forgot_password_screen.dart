@@ -1,8 +1,9 @@
-
+import 'package:ers_linux/features/auth/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -24,7 +25,10 @@ class ForgotPasswordScreen extends StatelessWidget {
 
     return BlocProvider(
       create:
-          (_) => AuthenticationBloc(initialState: const ForgotPasswordState()),
+          (_) => AuthenticationBloc(
+            initialState: const ForgotPasswordState(),
+            supabaseClient: getIt<SupabaseClient>(),
+          ),
       child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         builder: (context, state) {
           final forgotPassState =
@@ -50,13 +54,17 @@ class ForgotPasswordScreen extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () => context.pop(),
-                        icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.black,
+                        ),
                       ),
                       SizedBox(height: AppConstants.height(140)),
                       Center(
                         child: Text(
                           "Forgot Password",
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w100),
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.w100),
                         ),
                       ),
                       SizedBox(height: AppConstants.height(50)),
@@ -88,13 +96,15 @@ class ForgotPasswordScreen extends StatelessWidget {
                         children: [
                           Text(
                             "Note:",
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               "Login ID might not be same as email address",
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.lightText),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.lightText),
                             ),
                           ),
                         ],

@@ -1,9 +1,11 @@
 
+import 'package:ers_linux/features/auth/injection.dart';
 import 'package:ers_linux/features/auth/presentation/screens/otp_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -38,6 +40,7 @@ class ForgotLoginID extends StatelessWidget {
 
     return BlocProvider(
       create: (_) => AuthenticationBloc(
+        supabaseClient: getIt<SupabaseClient>(),
         initialState: ForgotLoginIdState()
       ),
       child: BlocBuilder<AuthenticationBloc, AuthenticationState>(

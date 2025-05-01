@@ -176,7 +176,7 @@
 //   }
 // }
 
-import 'package:ers_linux/core/config/injection.dart';
+import 'package:ers_linux/features/auth/injection.dart';
 import 'package:ers_linux/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ers_linux/features/auth/presentation/screens/login_screen.dart';
 import 'package:ers_linux/features/auth/presentation/screens/set_new_password.dart';
@@ -191,6 +191,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OtpVerification extends StatelessWidget {
   static const routePath = '/otp_verification';
@@ -207,8 +208,9 @@ class OtpVerification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthenticationBloc>(
-      create: (context) => getIt<AuthenticationBloc>(
+    return BlocProvider(
+      create: (_) => getIt<AuthenticationBloc>(
+        param1: OtpVerificationState(),
       ),
       child: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
