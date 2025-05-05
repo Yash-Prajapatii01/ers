@@ -1,8 +1,8 @@
+import 'package:ers_linux/features/scheduling/presentation/widgets/unifiedContainerTile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../../shared/constants/text_sizes.dart';
-import 'containerTile.dart';
 
 class ResourceSelector extends StatefulWidget {
   final List<String> avatarUrls;
@@ -111,10 +111,10 @@ class _ResourceSelectorState extends State<ResourceSelector> {
             ],
           ),
           const SizedBox(height: 24),
-          ContainerTile(
+          UnifiedContainerTile(
             title: 'Project',
-            itemText: '',
             iconPath: 'assets/icons/scheduling/booking/projects.svg',
+            interactionType: TileInteractionType.bottomSheet,
             bottomSheetContent: BottomSheetOptions(
               isSearchEnabled: true,
               title: 'Projects',
@@ -122,10 +122,10 @@ class _ResourceSelectorState extends State<ResourceSelector> {
             ),
           ),
           const SizedBox(height: 12),
-          ContainerTile(
+          UnifiedContainerTile(
             title: 'Task',
-            itemText: '',
             iconPath: 'assets/icons/scheduling/booking/ddss.svg',
+            interactionType: TileInteractionType.bottomSheet,
             bottomSheetContent: BottomSheetOptions(
               isSearchEnabled: true,
               title: 'Tasks',

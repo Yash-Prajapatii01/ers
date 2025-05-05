@@ -1,13 +1,13 @@
-import 'package:ers_linux/features/scheduling/presentation/widgets/CustomTextfield.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/DateSelector.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/ExpandableTile.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/PopupmenuTile.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/containerTile.dart';
+import 'package:ers_linux/features/scheduling/presentation/screens/NotesPageScreen.dart';
+import 'package:ers_linux/features/scheduling/presentation/widgets/unifiedCalender.dart';
 import 'package:ers_linux/shared/constants/text_sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../widgets/resource_component.dart';
+import '../widgets/unifiedCalenderTemp.dart';
+import '../widgets/unifiedContainerTile.dart';
 
 class BookingForm extends StatelessWidget {
   static const routePath = '/booking_form';
@@ -91,21 +91,39 @@ class BookingForm extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 8),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Requirement',
-                itemText: 'ID 2 / Project b...',
                 iconPath: 'assets/icons/scheduling/booking/requirements.svg',
+                interactionType: TileInteractionType.bottomSheet,
+                // isSearchEnabled: true,
                 bottomSheetContent: BottomSheetOptions(
-                  isSearchEnabled: true,
                   title: 'Requirements',
+                  isSearchEnabled: true,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   options: [
                     'ID 2 / Project b / 45 Hours',
                     'ID 3 / Project A / 30 Hours',
-                    'ID 2 / Project X / 11 Hours',
+                    'ID 1 / Project X / 11 Hours',
                     'ID 5 / Project C / 20 Hours',
                   ],
                 ),
               ),
+
+              // ContainerTile(
+              //   title: 'Requirement',
+              //   itemText: 'ID 2 / Project b...',
+              //   iconPath: 'assets/icons/scheduling/booking/requirements.svg',
+              //   bottomSheetContent: BottomSheetOptions(
+              //     isSearchEnabled: true,
+              //     title: 'Requirements',
+              //     options: [
+              //       'ID 2 / Project b / 45 Hours',
+              //       'ID 3 / Project A / 30 Hours',
+              //       'ID 2 / Project X / 11 Hours',
+              //       'ID 5 / Project C / 20 Hours',
+              //     ],
+              //   ),
+              // ),
               SizedBox(height: 24),
               ResourceSelector(
                 avatarUrls: [
@@ -116,26 +134,30 @@ class BookingForm extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 24),
-              DateTimeSelector(),
+              UnifiedCalendar(
+                initialDate: DateTime.now(),
+                isRangePicker: true,
+                showTime: true,
+                initialFromTime: TimeOfDay(hour: 9, minute: 00),
+                repeatOptions: ['Daily', 'Weekly', 'Monthly', 'Yearly', 'None'],
+              ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Email',
                 itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/email.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: BottomSheetOptions(
                   title: 'Email',
                   isTextFieldNeeded: true,
-                  customTextField: CustomTextField(
-                    hintText: 'Email',
-                    keyboardType: TextInputType.emailAddress,
-                  ),
+                  customTextField: CustomTextField(hintText: 'Email'),
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Performing Role',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/roles.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   isSearchEnabled: true,
                   options: [
@@ -147,67 +169,72 @@ class BookingForm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Number',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/numbers.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: BottomSheetOptions(
                   title: 'Number',
                   isTextFieldNeeded: true,
                   customTextField: CustomTextField(
                     hintText: 'Number',
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Fractional Number',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/fraction.svg',
-                bottomSheetContent: const BottomSheetOptions(
+                interactionType: TileInteractionType.bottomSheet,
+                bottomSheetContent: BottomSheetOptions(
                   title: 'Fractional Number',
                   isTextFieldNeeded: true,
                   customTextField: CustomTextField(
                     hintText: 'Fractional Number',
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
                   ),
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Simple Text',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/text_format.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Simple Text',
                   isTextFieldNeeded: true,
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Date',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/date.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Date',
                   isDateWidget: true,
-                  isTimeWidget: false,
                 ),
               ),
               SizedBox(height: 24),
-              ExpandableTile(
+              UnifiedContainerTile(
                 title: 'Progress',
                 iconPath: 'assets/icons/scheduling/booking/slider.svg',
+                interactionType: TileInteractionType.expandable,
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Department',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/ddss.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Department',
                   isDonethere: false,
+                  isSearchEnabled: true,
                   options: [
                     'Research',
                     'UI UX',
@@ -217,10 +244,10 @@ class BookingForm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Skill',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/ddms.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   DDMS: true,
                   title: 'Select the Skills',
@@ -234,10 +261,10 @@ class BookingForm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Select an option',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/uss.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   isSearchEnabled: true,
                   title: 'Select an option',
@@ -251,10 +278,10 @@ class BookingForm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Select an options',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/ums.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Select Options',
                   isDonethere: true,
@@ -269,30 +296,31 @@ class BookingForm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              //todo start from here.
-              ContainerTile(
+              // //todo start from here.
+              UnifiedContainerTile(
                 title: 'Priority',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/label.svg',
-                bottomSheetContent: BottomSheetOptions(
-                  // isColorPalleteNeeded: true,
-                ),
-              ),
-              SizedBox(height: 24),
-              ContainerTile(
-                title: 'Color picker',
-                itemText: '',
-                iconPath: 'assets/icons/scheduling/booking/color.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: BottomSheetOptions(
                   isColorPalleteNeeded: true,
                 ),
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
+                title: 'Colors',
+                iconPath: 'assets/icons/scheduling/booking/color.svg',
+                interactionType: TileInteractionType.bottomSheet,
+                bottomSheetContent: BottomSheetOptions(
+                  isColorPalleteNeeded: true,
+                ),
+              ),
+              SizedBox(height: 24),
+              UnifiedContainerTile(
                 title: 'Time Zone',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/time_zone.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
+                  isSearchEnabled: true,
                   options: [
                     '(UTC-11:00) Pacific/Midway (SST) ',
                     '(UTC-11:00) Pacific/Samoa (SST)  ',
@@ -300,49 +328,62 @@ class BookingForm extends StatelessWidget {
                     '(UTC-10:00) Pacific/Honolulu (HST)',
                     '(UTC-09:00) US/Aleutian (HADT)',
                   ],
-                  isSearchEnabled: true,
                 ),
               ),
               SizedBox(height: 24),
-              PopupmenuTile(
+              UnifiedContainerTile(
                 title: 'Effort',
-                // itemText: '20',
                 iconPath: 'assets/icons/scheduling/booking/efforts.svg',
+                interactionType: TileInteractionType.popupMenu,
                 isPinTextNeeded: true,
-                options: [
-                  '% Capacity',
-                  'Hours',
-                  'FTE'
-                ],
-                // itemText: '',
+                options: ['% Capacity', 'Hours', 'FTE'],
               ),
+              // PopupmenuTile(
+              //   title: 'Effort',
+              //   // itemText: '20',
+              //   iconPath: 'assets/icons/scheduling/booking/efforts.svg',
+              //   isPinTextNeeded: true,
+              //   options: ['% Capacity', 'Hours', 'FTE'],
+              //   // itemText: '',
+              // ),
               SizedBox(height: 24),
-              PopupmenuTile(
+              UnifiedContainerTile(
                 title: 'Confirmed',
-                // itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
-                isPinTextNeeded: false,
+                interactionType: TileInteractionType.popupMenu,
                 options: [
-                  'Yes',
-                  'No'
+                  'Yes','No'
                 ],
               ),
+
+              // PopupmenuTile(
+              //   title: 'Confirmed',
+              //   // itemText: '',
+              //   iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
+              //   isPinTextNeeded: false,
+              //   options: ['Yes', 'No'],
+              // ),
               SizedBox(height: 24),
-              PopupmenuTile(
+              UnifiedContainerTile(
                 title: 'Travel Required',
-                // itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
-                isPinTextNeeded: false,
+                interactionType: TileInteractionType.popupMenu,
                 options: [
-                  'Yes',
-                  'No'
+                  'Yes','No'
                 ],
               ),
+              // PopupmenuTile(
+              //   title: 'Travel Required',
+              //   // itemText: '',
+              //   iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
+              //   isPinTextNeeded: false,
+              //   options: ['Yes', 'No'],
+              // ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Date & Time',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/date.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Date & Time',
                   isDateWidget: true,
@@ -363,29 +404,24 @@ class BookingForm extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 8),
-              PopupmenuTile(
+              UnifiedContainerTile(
                 title: 'Billing Status',
-                // itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/projects.svg',
-                isPinTextNeeded: false,
-                options: [
-                  'Inherit from Project',
-                  'Billable',
-                  'Non Billable'
-                ],
+                interactionType: TileInteractionType.popupMenu,
+                options: ['Inherit from Project', 'Billable', 'Non Billable'],
               ),
               SizedBox(height: 24),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Billing Rate',
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/requirements.svg',
+                interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: const BottomSheetOptions(
                   isDonethere: true,
                   options: [
                     'Inherit from Project',
                     'Inherit from Resource',
                     'Inherit from Role',
-                    'Custom'
+                    'Custom',
                   ],
                 ),
               ),
@@ -402,12 +438,11 @@ class BookingForm extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 8),
-              ContainerTile(
+              UnifiedContainerTile(
                 title: 'Notes',
-                nextpageto: true,
-                itemText: '',
                 iconPath: 'assets/icons/scheduling/booking/notes.svg',
-                bottomSheetContent: const BottomSheetOptions(),
+                interactionType: TileInteractionType.navigation,
+                navigationTarget: NotesPageScreen(),
               ),
             ],
           ),
