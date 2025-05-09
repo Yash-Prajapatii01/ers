@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomWheelPicker extends StatefulWidget {
-  const CustomWheelPicker({super.key});
+  final ValueChanged<Map<String, dynamic>> onSelected;
+
+  const CustomWheelPicker({super.key, required this.onSelected});
 
   @override
   State<CustomWheelPicker> createState() => _CustomWheelPickerState();
@@ -26,7 +28,6 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
     const double overlayWidth = 350;
     const double overlayHeight = 40;
     const double listHeight = 250;
-
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -59,16 +60,16 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
                   perspective: 0.00000000001,
                   physics: const FixedExtentScrollPhysics(),
                   diameterRatio: 10.0,
-                  onSelectedItemChanged: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+                  onSelectedItemChanged: (idx) {
+                    setState(() => _selectedIndex = idx);
+                    widget.onSelected(options[idx]);
                   },
                   childDelegate: ListWheelChildBuilderDelegate(
                     childCount: options.length,
                     builder: (context, index) {
                       final bool isSelected = index == _selectedIndex;
-                      final double width = isSelected ? selectedWidth : tileWidth;
+                      final double width =
+                          isSelected ? selectedWidth : tileWidth;
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.symmetric(vertical: 5),
@@ -81,9 +82,7 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
                         ),
                         child: Text(
                           options[index]['label'],
-                          style: TextStyle(
-                            fontSize: isSelected ? 16 : 14,
-                          ),
+                          style: TextStyle(fontSize: isSelected ? 16 : 14),
                         ),
                       );
                     },

@@ -361,10 +361,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   int min(int a, int b) => a < b ? a : b;
 }
 
-
-/// Enum to track which picker is currently active
 enum PickerType { none, fromDate, toDate, fromTime, toTime, singleDate, singleTime }
-
 
 class CalendarHeader extends StatelessWidget {
   final String monthYearText;
@@ -514,23 +511,24 @@ class CalendarGrid extends StatelessWidget {
 class PillText extends StatelessWidget {
   final String text;
   final Color color;
+  final bool isCalender;
 
-  const PillText(this.text, this.color, {Key? key}) : super(key: key);
+  const PillText(this.text, this.color, {Key? key, this.isCalender = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: isCalender? const EdgeInsets.symmetric(horizontal: 14, vertical: 8) : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-          color: const Color(0xFFF4F4F4),
-          borderRadius: BorderRadius.circular(8)
+          color: isCalender? Color(0xFFF4F4F4) : Colors.grey.shade100,
+          borderRadius: isCalender ? BorderRadius.circular(8) : BorderRadius.circular(4)
       ),
       child: Text(
           text,
           style: TextStyle(
-              fontSize: 16,
+              fontSize: isCalender? 16 : 14,
               fontWeight: FontWeight.w400,
-              color: color
+              color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5)
           )
       ),
     );
@@ -568,13 +566,13 @@ class DateTimeRow extends StatelessWidget {
           if (date != null)
             GestureDetector(
               onTap: onDateTap,
-              child: PillText(date!, dateColor ?? Colors.black),
+              child: PillText(date!, dateColor ?? Colors.black, isCalender: true,),
             ),
           if (date != null && time != null) const SizedBox(width: 8),
           if (time != null)
             GestureDetector(
               onTap: onTimeTap,
-              child: PillText(time!, timeColor ?? Colors.black),
+              child: PillText(time!, timeColor ?? Colors.black, isCalender: true,),
             ),
         ],
       ),

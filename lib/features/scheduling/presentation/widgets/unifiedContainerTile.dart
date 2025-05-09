@@ -128,6 +128,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
   double _sliderValue = 0.0;
   final TextEditingController _effortController = TextEditingController();
   Color? selectedColor;
+  String? selectedLabel;
 
   @override
   void initState() {
@@ -184,7 +185,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
     // Use ternary operator to set initial size based on the opening option
     final double initialSize = startFullSize ? 0.90 : 0.50;
 
-    showModalBottomSheet<String>(
+    showModalBottomSheet<dynamic>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -201,30 +202,83 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
             child: child,
           ),
     ).then((selected) {
-      final bool isColorSheet = child is BottomSheetOptions
-          && (child as BottomSheetOptions).isColorPalleteNeeded == true;
+      final bool isColorSheet =
+          child is BottomSheetOptions && (child).isColorPalleteNeeded == true;
+      if (selected == null) return;
 
-      if (selected == null || selected.isEmpty) return;
+      // 1) Priority picker: Map with both label & color
+      if (selected is Map<String, dynamic>
+          && selected['label'] is String
+          && selected['color'] is Color) {
+        setState(() {
+          selectedLabel = selected['label'] as String;
+          selectedColor = selected['color'] as Color;
+          _itemText     = selectedLabel!;
+        });
+        widget.onTextChanged?.call(selectedLabel!);
+        return;
+      }
 
-
-      if (isColorSheet) {
-        final int? colorValue = int.tryParse(selected);
-        if (colorValue != null) {
+      // 2) Color‐only sheet: child.isColorPalleteNeeded == true, returns a String colorValue
+      if (child is BottomSheetOptions
+          && (child).isColorPalleteNeeded == true
+          && selected is String) {
+        final int? colorVal = int.tryParse(selected);
+        if (colorVal != null) {
           setState(() {
-            print('Here is the color pallete !!');
-            selectedColor = Color(colorValue);
-            _itemText = '';
+            selectedLabel = null;              // no text label in this mode
+            selectedColor = Color(colorVal);
+            _itemText     = '';                // clear any old text
           });
+          widget.onTextChanged?.call('');     // or call with empty
         }
         return;
       }
 
-      setState(() {
-        print('Here is the else part');
-        selectedColor = null;
-        _itemText = selected;
-      });
-      widget.onTextChanged?.call(selected);
+      // 3) Fallback for all other String‐returning sheets (dates, text, DDMS…)
+      if (selected is String) {
+        setState(() {
+          selectedLabel = null;
+          selectedColor = null;
+          _itemText     = selected;
+        });
+        widget.onTextChanged?.call(selected);
+        return;
+      }
+
+      // if (selected is Map<String, dynamic>
+      //     && selected.containsKey('label')
+      //     && selected.containsKey('color')
+      //     && selected['label'] is String
+      //     && selected['color'] is Color) {
+      //   setState(() {
+      //     selectedLabel = selected['label'] as String;
+      //     selectedColor = selected['color'] as Color;
+      //     _itemText     = selectedLabel!;
+      //   });
+      //
+      // if (selected == null || selected.isEmpty) return;
+      //
+      // if (isColorSheet) {
+      //   final int? colorValue = int.tryParse(selected);
+      //   if (colorValue != null) {
+      //     setState(() {
+      //       print('Here is the color pallete !!');
+      //       selectedColor = Color(colorValue);
+      //       _itemText = '';
+      //     });
+      //   }
+      //   return;
+      // }
+      //
+      // if (isLabel) {}
+      //
+      // setState(() {
+      //   print('Here is the else part');
+      //   selectedColor = null;
+      //   _itemText = selected;
+      // });
+      // widget.onTextChanged?.call(selected);
     });
   }
 
@@ -371,7 +425,28 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
       case TileInteractionType.bottomSheet:
         return Row(
           children: [
-            if (selectedColor != null) ...[
+            if (selectedLabel != null && selectedColor != null) ...[
+              if(selectedLabel != 'None')
+                Container(
+                  width: 80,
+                  height: 25,
+                  decoration: BoxDecoration(
+                    color: selectedColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Center(
+                    child: Text(
+                      selectedLabel!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+            if (selectedColor != null && selectedLabel == null) ...[
               Container(
                 width: 24,
                 height: 24,
@@ -381,15 +456,15 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
                   border: Border.all(color: Colors.grey.shade400),
                 ),
               ),
-            ] else ...[
-              Text(
-                _itemText,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color.fromRGBO(102, 112, 133, 0.5),
-                  overflow: TextOverflow.ellipsis,
+            ] ,if(selectedColor == null) ...[
+                Text(
+                  _itemText,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color.fromRGBO(102, 112, 133, 0.5),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
             ],
             // Text(
             //   _itemText,
@@ -631,6 +706,8 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
   late bool _timePicked = false;
   late TimeOfDay _localTime;
   late Color _localColor;
+  String _pickedLabel = 'None';
+  Color  _pickedColor = Colors.transparent;
 
   @override
   void initState() {
@@ -682,7 +759,14 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
       result = textValue;
     } else if (_selectedOption != null) {
       result = _selectedOption!;
-    } else if (widget.isColorPalleteNeeded == true) {
+    } else if(widget.isPriority == true){
+      Navigator.pop<Map<String, dynamic>>(
+        context,
+        {'label': _pickedLabel, 'color': _pickedColor},
+      );
+      return;
+    }
+    else if (widget.isColorPalleteNeeded == true) {
       result = _localColor.value.toString();
     } else if (widget.isDateWidget!) {
       if (widget.isTimeWidget!) {
@@ -859,7 +943,14 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
       );
     }
     if (widget.isPriority == true) {
-      return CustomWheelPicker();
+      return CustomWheelPicker(
+          onSelected: (map) {
+            setState(() {
+              _pickedLabel = map['label'] as String;
+              _pickedColor = map['color'] as Color;
+            });
+          }
+      );
     }
     if (widget.isDateWidget == true && widget.isTimeWidget == true) {
       return UnifiedCalendar(
@@ -1082,32 +1173,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
           setState(() {});
           widget.onChanged?.call(value);
         },
-      ),
-    );
-  }
-}
-
-class PillText extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  const PillText(this.text, this.color, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Color.fromRGBO(102, 112, 133, 0.5),
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-        ),
       ),
     );
   }
