@@ -158,7 +158,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
         break;
       case TileInteractionType.bottomSheet:
         if (widget.bottomSheetContent != null) {
-          _showCustomBottomSheet(
+          showCustomBottomSheet(
             context,
             widget.bottomSheetContent!,
             startFullSize:
@@ -177,7 +177,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
     }
   }
 
-  void _showCustomBottomSheet(
+  void showCustomBottomSheet(
     BuildContext context,
     Widget child, {
     startFullSize,
@@ -189,7 +189,6 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      // Allow tapping outside to dismiss the sheet
       isDismissible: true,
       builder:
           (_) => Container(
@@ -226,11 +225,11 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
         final int? colorVal = int.tryParse(selected);
         if (colorVal != null) {
           setState(() {
-            selectedLabel = null;              // no text label in this mode
+            selectedLabel = null;
             selectedColor = Color(colorVal);
-            _itemText     = '';                // clear any old text
+            _itemText     = '';
           });
-          widget.onTextChanged?.call('');     // or call with empty
+          widget.onTextChanged?.call('');
         }
         return;
       }
@@ -245,40 +244,6 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
         widget.onTextChanged?.call(selected);
         return;
       }
-
-      // if (selected is Map<String, dynamic>
-      //     && selected.containsKey('label')
-      //     && selected.containsKey('color')
-      //     && selected['label'] is String
-      //     && selected['color'] is Color) {
-      //   setState(() {
-      //     selectedLabel = selected['label'] as String;
-      //     selectedColor = selected['color'] as Color;
-      //     _itemText     = selectedLabel!;
-      //   });
-      //
-      // if (selected == null || selected.isEmpty) return;
-      //
-      // if (isColorSheet) {
-      //   final int? colorValue = int.tryParse(selected);
-      //   if (colorValue != null) {
-      //     setState(() {
-      //       print('Here is the color pallete !!');
-      //       selectedColor = Color(colorValue);
-      //       _itemText = '';
-      //     });
-      //   }
-      //   return;
-      // }
-      //
-      // if (isLabel) {}
-      //
-      // setState(() {
-      //   print('Here is the else part');
-      //   selectedColor = null;
-      //   _itemText = selected;
-      // });
-      // widget.onTextChanged?.call(selected);
     });
   }
 
@@ -426,7 +391,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
         return Row(
           children: [
             if (selectedLabel != null && selectedColor != null) ...[
-              if(selectedLabel != 'None')
+              // if(selectedLabel != 'None')
                 Container(
                   width: 80,
                   height: 25,
@@ -457,12 +422,19 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
                 ),
               ),
             ] ,if(selectedColor == null) ...[
-                Text(
-                  _itemText,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color.fromRGBO(102, 112, 133, 0.5),
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: 130 // how maximum of width the user input can be shown it customized here...
+                  ),
+                  child: Text(
+                    _itemText,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color.fromRGBO(102, 112, 133, 0.5),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
             ],
@@ -487,7 +459,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
             children: [
               GestureDetector(
                 onTap:
-                    () => _showCustomBottomSheet(
+                    () => showCustomBottomSheet(
                       context,
                       BottomSheetOptions(
                         isTextFieldNeeded: true,
@@ -543,13 +515,19 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
             onTap: _showPopupMenu,
             child: Row(
               children: [
-                Text(
-                  _selectedOption.isEmpty ? "" : _selectedOption,
-                  // can add 'Select for better UX'
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey,
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: 130
+                  ),
+                  child: Text(
+                    _selectedOption.isEmpty ? "" : _selectedOption,
+                    overflow: TextOverflow.ellipsis,
+                    // can add 'Select for better UX'
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(102, 112, 133, 0.5),
+                    ),
                   ),
                 ),
                 Padding(

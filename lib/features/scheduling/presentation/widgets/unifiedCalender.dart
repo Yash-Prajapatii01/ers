@@ -697,7 +697,8 @@ class RepeatRow extends StatelessWidget {
             // const SizedBox(width: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-              child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
+              child: Image.asset('assets/icons/scheduling/booking/img.png', width: 8, height: 20,),
+              // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
             )
             // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
           ],

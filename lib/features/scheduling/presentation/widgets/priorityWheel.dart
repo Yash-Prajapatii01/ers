@@ -25,7 +25,6 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
     const double tileWidth = 87;
     const double tileHeight = 30;
     const double selectedWidth = 150;
-    const double overlayWidth = 350;
     const double overlayHeight = 40;
     const double listHeight = 250;
 
@@ -38,17 +37,19 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
             children: [
               Positioned(
                 top: (listHeight - overlayHeight) / 2,
-                left: (MediaQuery.of(context).size.width - overlayWidth) / 2,
-                child: Container(
-                  width: overlayWidth,
-                  height: overlayHeight,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 350,
+                    height: overlayHeight,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
-
               NotificationListener<ScrollNotification>(
                 onNotification: (_) {
                   setState(() {});
@@ -68,8 +69,7 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
                     childCount: options.length,
                     builder: (context, index) {
                       final bool isSelected = index == _selectedIndex;
-                      final double width =
-                          isSelected ? selectedWidth : tileWidth;
+                      final double width = isSelected ? selectedWidth : tileWidth;
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.symmetric(vertical: 5),
@@ -86,6 +86,56 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
                         ),
                       );
                     },
+                  ),
+                ),
+              ),
+
+              // Top blur overlay
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 60,
+                child: IgnorePointer(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                          Colors.white,
+                          Color.fromRGBO(255, 255, 255, 0),
+                          // Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom blur overlay
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 50,
+                child: IgnorePointer(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                          Colors.white,
+                          Color.fromRGBO(255, 255, 255, 0),
+                          // Colors.transparent,
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
