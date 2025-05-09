@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../shared/constants/text_sizes.dart';
 
@@ -37,22 +39,29 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
           // Icons row
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.image_outlined, color: Colors.grey),
-                onPressed: () {},
+              InkWell(
+                child: Padding(
+                  padding: const EdgeInsets.all(2.5),
+                  child: SvgPicture.asset('assets/icons/scheduling/gallery.svg'),
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.alternate_email, color: Colors.grey),
+                icon: const Icon(Icons.alternate_email, color: Color.fromRGBO(102, 112, 133, 0.5)),
                 onPressed: () {},
               ),
-              IconButton(
-                icon: const Icon(Icons.attach_file, color: Colors.grey),
-                onPressed: () {},
+              InkWell(
+                child: Padding(
+                  padding: const EdgeInsets.all(2.5),
+                  child: SvgPicture.asset('assets/icons/scheduling/pin.svg'),
+                ),
               ),
               const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.send, color: Colors.grey),
-                onPressed: () {},
+              Transform.rotate(
+                angle: 0.758,
+                child: IconButton(
+                  icon: const Icon(CupertinoIcons.paperplane_fill, color: Colors.grey),
+                  onPressed: () {},
+                ),
               ),
             ],
           ),
@@ -134,7 +143,9 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
         child: Column(
           children: [
             Spacer(),
-            Image.asset('icons/scheduling/notes.png'),
+            Image.asset('assets/icons/scheduling/notes.jpg', width: 260, height: 260,),
+            SizedBox(height: 10),
+            Text('You can store all your notes here.'),
             Spacer(),
             _buildTextInputArea()
           ],

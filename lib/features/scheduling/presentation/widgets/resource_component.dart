@@ -118,6 +118,8 @@ class _ResourceSelectorState extends State<ResourceSelector> {
             bottomSheetContent: BottomSheetOptions(
               isSearchEnabled: true,
               title: 'Projects',
+              showCheckboxes: false,
+              DDMS: true,
               options: ['FocusFlow', 'FitLoop', 'LearnMate', 'StreakSync'],
             ),
           ),

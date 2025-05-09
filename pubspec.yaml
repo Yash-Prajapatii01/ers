@@ -83,6 +83,7 @@ flutter:
     - assets/icons/
     - assets/icons/dashboard/
     - assets/icons/scheduling/booking/
+    - assets/icons/scheduling/
     - assets/lottie/
 
 

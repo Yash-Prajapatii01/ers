@@ -62,7 +62,7 @@ class AppRouter {
       ),
       GoRoute(
         path: BookingForm.routePath,
-        builder: (context, state) => const BookingForm(),
+        builder: (context, state) =>  BookingForm(),
       ),
     ],
     errorBuilder:

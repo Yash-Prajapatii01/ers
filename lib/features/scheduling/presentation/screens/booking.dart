@@ -1,18 +1,32 @@
 import 'package:ers_linux/features/scheduling/presentation/screens/NotesPageScreen.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/unifiedCalender.dart';
 import 'package:ers_linux/shared/constants/text_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../widgets/resource_component.dart';
-import '../widgets/unifiedCalenderTemp.dart';
+import '../widgets/unifiedCalender.dart';
 import '../widgets/unifiedContainerTile.dart';
 
-class BookingForm extends StatelessWidget {
+class BookingForm extends StatefulWidget {
   static const routePath = '/booking_form';
 
   const BookingForm({super.key});
+
+  @override
+  State<BookingForm> createState() => _BookingFormState();
+}
+
+class _BookingFormState extends State<BookingForm> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
+  final TextEditingController _fractionController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController;
+    _numberController;
+    _fractionController;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +68,7 @@ class BookingForm extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8), // Rounded corners
                   ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 14.w,
-                    vertical: 8.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
                 child: Text(
                   'Save',
@@ -95,10 +106,13 @@ class BookingForm extends StatelessWidget {
                 title: 'Requirement',
                 iconPath: 'assets/icons/scheduling/booking/requirements.svg',
                 interactionType: TileInteractionType.bottomSheet,
+                fullSizeBottomSheet: true,
                 // isSearchEnabled: true,
                 bottomSheetContent: BottomSheetOptions(
                   title: 'Requirements',
                   isSearchEnabled: true,
+                  isDragHandleNeeded: true,
+
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   options: [
                     'ID 2 / Project b / 45 Hours',
@@ -108,22 +122,6 @@ class BookingForm extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // ContainerTile(
-              //   title: 'Requirement',
-              //   itemText: 'ID 2 / Project b...',
-              //   iconPath: 'assets/icons/scheduling/booking/requirements.svg',
-              //   bottomSheetContent: BottomSheetOptions(
-              //     isSearchEnabled: true,
-              //     title: 'Requirements',
-              //     options: [
-              //       'ID 2 / Project b / 45 Hours',
-              //       'ID 3 / Project A / 30 Hours',
-              //       'ID 2 / Project X / 11 Hours',
-              //       'ID 5 / Project C / 20 Hours',
-              //     ],
-              //   ),
-              // ),
               SizedBox(height: 24),
               ResourceSelector(
                 avatarUrls: [
@@ -139,18 +137,32 @@ class BookingForm extends StatelessWidget {
                 isRangePicker: true,
                 showTime: true,
                 initialFromTime: TimeOfDay(hour: 9, minute: 00),
-                repeatOptions: ['Daily', 'Weekly', 'Monthly', 'Yearly', 'None'],
+                repeatOptions: [
+                  'None',
+                  'Daily',
+                  'Weekly',
+                  'Monthly',
+                  'Yearly',
+                  'Custom',
+                ],
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Email',
-                itemText: '',
+                itemText: _emailController.text,
                 iconPath: 'assets/icons/scheduling/booking/email.svg',
                 interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: BottomSheetOptions(
                   title: 'Email',
                   isTextFieldNeeded: true,
-                  customTextField: CustomTextField(hintText: 'Email'),
+                  customTextField: CustomTextField(
+                    hintText: 'Email',
+                    controller: _emailController,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  onDone: () {
+                    setState(() {});
+                  },
                 ),
               ),
               SizedBox(height: 24),
@@ -178,9 +190,12 @@ class BookingForm extends StatelessWidget {
                   isTextFieldNeeded: true,
                   customTextField: CustomTextField(
                     hintText: 'Number',
+                    controller: _numberController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (_) => setState(() {}),
                   ),
+                  onDone: () => setState(() {}),
                 ),
               ),
               SizedBox(height: 24),
@@ -192,12 +207,15 @@ class BookingForm extends StatelessWidget {
                   title: 'Fractional Number',
                   isTextFieldNeeded: true,
                   customTextField: CustomTextField(
+                    controller: _fractionController,
                     hintText: 'Fractional Number',
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                     ],
+                    onChanged: (_) => setState(() {}),
                   ),
+                  onDone: () => setState(() {}),
                 ),
               ),
               SizedBox(height: 24),
@@ -213,8 +231,18 @@ class BookingForm extends StatelessWidget {
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Date',
+                // itemText: _selectedDate == null
+                //     ? ''
+                //     : DateFormat('d MMM yyyy').format(_selectedDate),
                 iconPath: 'assets/icons/scheduling/booking/date.svg',
                 interactionType: TileInteractionType.bottomSheet,
+                fullSizeBottomSheet: true,
+                // onTextChanged: (formatted) {
+                //   setState(() {
+                //     // parse it back, or directly store a String if you don't need DateTime
+                //     _selectedDate = DateFormat('d MMM yyyy').parse(formatted);
+                //   });
+                // },
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Date',
                   isDateWidget: true,
@@ -296,13 +324,13 @@ class BookingForm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              // //todo start from here.
+              // //todo start from here for the color
               UnifiedContainerTile(
                 title: 'Priority',
                 iconPath: 'assets/icons/scheduling/booking/label.svg',
                 interactionType: TileInteractionType.bottomSheet,
                 bottomSheetContent: BottomSheetOptions(
-                  isColorPalleteNeeded: true,
+                  isPriority: true,
                 ),
               ),
               SizedBox(height: 24),
@@ -338,56 +366,31 @@ class BookingForm extends StatelessWidget {
                 isPinTextNeeded: true,
                 options: ['% Capacity', 'Hours', 'FTE'],
               ),
-              // PopupmenuTile(
-              //   title: 'Effort',
-              //   // itemText: '20',
-              //   iconPath: 'assets/icons/scheduling/booking/efforts.svg',
-              //   isPinTextNeeded: true,
-              //   options: ['% Capacity', 'Hours', 'FTE'],
-              //   // itemText: '',
-              // ),
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Confirmed',
                 iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
                 interactionType: TileInteractionType.popupMenu,
-                options: [
-                  'Yes','No'
-                ],
+                options: ['Yes', 'No'],
               ),
-
-              // PopupmenuTile(
-              //   title: 'Confirmed',
-              //   // itemText: '',
-              //   iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
-              //   isPinTextNeeded: false,
-              //   options: ['Yes', 'No'],
-              // ),
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Travel Required',
                 iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
                 interactionType: TileInteractionType.popupMenu,
-                options: [
-                  'Yes','No'
-                ],
+                options: ['Yes', 'No'],
               ),
-              // PopupmenuTile(
-              //   title: 'Travel Required',
-              //   // itemText: '',
-              //   iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
-              //   isPinTextNeeded: false,
-              //   options: ['Yes', 'No'],
-              // ),
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Date & Time',
                 iconPath: 'assets/icons/scheduling/booking/date.svg',
                 interactionType: TileInteractionType.bottomSheet,
+                fullSizeBottomSheet: true,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Date & Time',
                   isDateWidget: true,
                   isTimeWidget: true,
+
                 ),
               ),
               SizedBox(height: 24),
