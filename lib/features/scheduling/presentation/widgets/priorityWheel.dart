@@ -117,7 +117,7 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
 
               // Bottom blur overlay
               Positioned(
-                bottom: 0,
+                bottom: -1,
                 left: 0,
                 right: 0,
                 height: 50,
@@ -128,8 +128,6 @@ class _CustomWheelPickerState extends State<CustomWheelPicker> {
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          Colors.white,
-                          Colors.white,
                           Colors.white,
                           Color.fromRGBO(255, 255, 255, 0),
                           // Colors.transparent,

@@ -48,13 +48,22 @@ class _BookingFormState extends State<BookingForm> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    //todo : to use the SVG icon rather than this
-                    SizedBox(
-                      width: 16,
-                      height: 30,
-                      child: Icon(Icons.chevron_left_rounded, size: 30),
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        alignment: Alignment.centerLeft,
+                        child: Icon(
+                          Icons.chevron_left_rounded,
+                          size: 30
+                        ),
+                        // Replace Icon with your SVG later:
+                        // child: SvgPicture.asset('assets/icons/chevron_left.svg'),
+                      ),
                     ),
-                    SizedBox(width: 20),
+                    SizedBox(width: 4), // Adjust for visual spacing with text
                     Text(
                       'Booking',
                       style: TextStyle(
@@ -66,6 +75,31 @@ class _BookingFormState extends State<BookingForm> {
                     ),
                   ],
                 ),
+                // child: Row(
+                //   mainAxisAlignment: MainAxisAlignment.start,
+                //   children: [
+                //     //todo : to use the SVG icon rather than this
+                //     InkWell(
+                //       onTap : () => Navigator.pop(context),
+                //       child: Container(
+                //         alignment: Alignment.center,
+                //         width: 18,
+                //         height: 10,
+                //         child: Icon(Icons.chevron_left_rounded),
+                //       ),
+                //     ),
+                //     SizedBox(width: 10),
+                //     Text(
+                //       'Booking',
+                //       style: TextStyle(
+                //         fontSize: 18,
+                //         fontWeight: FontWeight.w500,
+                //         color: Color.fromRGBO(39, 39, 39, 1),
+                //       ),
+                //       overflow: TextOverflow.ellipsis,
+                //     ),
+                //   ],
+                // ),
               ),
               Spacer(),
               Padding(
@@ -330,7 +364,7 @@ class _BookingFormState extends State<BookingForm> {
                 title: 'Date',
                 iconPath: 'assets/icons/scheduling/booking/date.svg',
                 interactionType: TileInteractionType.bottomSheet,
-                fullSizeBottomSheet: false,
+                fullSizeBottomSheet: true,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Date',
                   isDateWidget: true,

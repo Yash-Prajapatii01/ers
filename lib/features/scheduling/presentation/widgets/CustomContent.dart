@@ -515,14 +515,24 @@ class _FrequencyUnitSelectorState extends State<FrequencyUnitSelector> {
               GestureDetector(
                 onTap: () => setState(() => _showUnitOptions = !_showUnitOptions),
                 child: Text(
-                  _selectedFrequency == 'Weekly' && _selectedDays.isNotEmpty
-                      ? (_selectedDays.length == 1
-                      ? _selectedDays.first
-                      : '${_selectedDays.first} + ${_selectedDays.length - 1}')
-                      : (_selectedUnitType.isNotEmpty || _selectedUnitValue != null
-                      ? '$_selectedUnitValue $_selectedUnitType'
-                      : unitLabel),
-                  style: const TextStyle(color: Colors.blue),
+                  (_selectedUnitType.isNotEmpty || _selectedUnitValue != null)
+                      ? ('$_selectedUnitValue $_selectedUnitType')
+                      : unitLabel,
+                  // _selectedFrequency == 'Weekly' && _selectedDays.isNotEmpty
+                  //     ? (_selectedDays.length == 1
+                  //     ? _selectedDays.first
+                  //     : '${_selectedDays.first} + ${_selectedDays.length - 1}')
+                  //     : (_selectedUnitType.isNotEmpty || _selectedUnitValue != null
+                  //     ? '$_selectedUnitValue $_selectedUnitType'
+                  //     : unitLabel),
+                  // style: (_selectedUnitType.isNotEmpty || _selectedUnitValue != null && _selectedDays.isNotEmpty) ? TextStyle(color: Colors.blue) : TextStyle(color: Color.fromRGBO(102, 112, 133, 0.5)),
+                  style: (
+                      (_selectedFrequency == 'Weekly' && _selectedDays.isNotEmpty) ||
+                          (_selectedUnitType.isNotEmpty || _selectedUnitValue != null)
+                  )
+                      ? const TextStyle(color: Colors.blue)
+                      : const TextStyle(color: Color.fromRGBO(102, 112, 133, 0.5)),
+
                 ),
               ),
               // GestureDetector(
@@ -858,8 +868,8 @@ class MonthSelector extends StatelessWidget {
             bool isSelected = selectedMonth == month;
 
             EdgeInsets margin = EdgeInsets.only(
-              left: colIndex == 0 ? 0 : 13,
-              right: colIndex == 3 ? 0 : 10,
+              left: colIndex == 0 ? 0 : 11.5,
+              right: colIndex == 3 ? 0 : 11.5,
             );
             return GestureDetector(
               onTap: () {
