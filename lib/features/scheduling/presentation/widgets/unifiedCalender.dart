@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 class UnifiedCalendar extends StatefulWidget {
@@ -11,10 +10,18 @@ class UnifiedCalendar extends StatefulWidget {
   final bool showTime;
   final bool isRangePicker;
   final ValueChanged<DateTime>? onDateSelected;
-  final Function(DateTime fromDate, TimeOfDay fromTime,
-      DateTime toDate, TimeOfDay toTime)? onRangeChanged;
+  final Function(
+    DateTime fromDate,
+    TimeOfDay fromTime,
+    DateTime toDate,
+    TimeOfDay toTime,
+  )?
+  onRangeChanged;
   final ValueChanged<String>? onRepeatSelected;
   final List<String>? repeatOptions;
+  final bool showWeekdayLabels;
+  final bool topheader;
+  final bool remmoveInternalPadding;
 
   const UnifiedCalendar({
     Key? key,
@@ -28,6 +35,9 @@ class UnifiedCalendar extends StatefulWidget {
     this.onRangeChanged,
     this.onRepeatSelected,
     this.repeatOptions,
+    this.showWeekdayLabels = true,
+    this.topheader = true,
+    this.remmoveInternalPadding = false,
   }) : super(key: key);
 
   @override
@@ -59,11 +69,14 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
 
   // Format helpers
   String _formatDate(DateTime date) => DateFormat('d MMM yyyy').format(date);
+
   String _formatTime(TimeOfDay time) {
     final dt = DateTime(0, 0, 0, time.hour, time.minute);
     return DateFormat.jm().format(dt);
   }
-  String _formatMonthYear(DateTime date) => DateFormat('MMMM yyyy').format(date);
+
+  String _formatMonthYear(DateTime date) =>
+      DateFormat('MMMM yyyy').format(date);
 
   void _togglePicker(PickerType type) {
     setState(() {
@@ -126,12 +139,15 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: widget.isRangePicker ? BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFCFCFCF), width: 0.5),
-      ) : null,
+      padding: widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.all(16),
+      decoration:
+          widget.isRangePicker && !widget.remmoveInternalPadding
+              ? BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFCFCFCF), width: 0.5),
+              )
+              : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -144,7 +160,10 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
               dateColor: pickedFromDate ? Colors.blue : const Color(0xFF333333),
               timeColor: pickedFromTime ? Colors.blue : const Color(0xFF333333),
               onDateTap: () => _togglePicker(PickerType.fromDate),
-              onTimeTap: widget.showTime ? () => _togglePicker(PickerType.fromTime) : null,
+              onTimeTap:
+                  widget.showTime
+                      ? () => _togglePicker(PickerType.fromTime)
+                      : null,
             ),
 
             // Calendar for from date (only when activated)
@@ -184,11 +203,15 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
 
             // Time section with divider if time is enabled
             if (widget.showTime) ...[
-              const Divider(thickness: 0.7, color: Color.fromRGBO(102, 112, 133, 0.2),),
+              const Divider(
+                thickness: 0.7,
+                color: Color.fromRGBO(102, 112, 133, 0.2),
+              ),
               DateTimeRow(
                 label: 'Time',
                 time: _formatTime(fromTime),
-                timeColor: pickedFromTime ? Colors.blue : const Color(0xff333333),
+                timeColor:
+                    pickedFromTime ? Colors.blue : const Color(0xff333333),
                 onTimeTap: () => _togglePicker(PickerType.singleTime),
               ),
 
@@ -213,13 +236,19 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                   },
                 ),
 
-              const Divider(thickness: 0.7 , color: Color.fromRGBO(102, 112, 133, 0.2),),
+              const Divider(
+                thickness: 0.7,
+                color: Color.fromRGBO(102, 112, 133, 0.2),
+              ),
             ],
           ],
 
           // Only show To section and Repeat options in range picker mode
           if (widget.isRangePicker) ...[
-            const Divider(thickness: 0.7 , color: Color.fromRGBO(102, 112, 133, 0.2),),
+            const Divider(
+              thickness: 0.7,
+              color: Color.fromRGBO(102, 112, 133, 0.2),
+            ),
             // To row
             DateTimeRow(
               label: 'To',
@@ -228,7 +257,10 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
               dateColor: pickedToDate ? Colors.blue : const Color(0xFF333333),
               timeColor: pickedToTime ? Colors.blue : const Color(0xFF333333),
               onDateTap: () => _togglePicker(PickerType.toDate),
-              onTimeTap: widget.showTime ? () => _togglePicker(PickerType.toTime) : null,
+              onTimeTap:
+                  widget.showTime
+                      ? () => _togglePicker(PickerType.toTime)
+                      : null,
             ),
 
             // Calendar for to date
@@ -249,8 +281,12 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
               ),
 
             // Only show repeat options if provided
-            if (widget.repeatOptions != null && widget.repeatOptions!.isNotEmpty) ...[
-              const Divider(thickness: 0.7,color: Color.fromRGBO(102, 112, 133, 0.2),),
+            if (widget.repeatOptions != null &&
+                widget.repeatOptions!.isNotEmpty) ...[
+              const Divider(
+                thickness: 0.7,
+                color: Color.fromRGBO(102, 112, 133, 0.2),
+              ),
               RepeatRow(
                 label: 'Repeat',
                 value: repeat.isEmpty ? '' : repeat,
@@ -269,23 +305,26 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
     return Column(
       children: [
         // Month navigation header
-        CalendarHeader(
-          monthYearText: _formatMonthYear(displayedMonth),
-          showMonthYearPicker: showMonthYearPicker,
-          onToggleMonthYearPicker: _toggleMonthYearPicker,
-          onPreviousMonth: () => setState(() {
-            displayedMonth = DateTime(
-                displayedMonth.year,
-                displayedMonth.month - 1
-            );
-          }),
-          onNextMonth: () => setState(() {
-            displayedMonth = DateTime(
-                displayedMonth.year,
-                displayedMonth.month + 1
-            );
-          }),
-        ),
+        if (widget.topheader)
+          CalendarHeader(
+            monthYearText: _formatMonthYear(displayedMonth),
+            showMonthYearPicker: showMonthYearPicker,
+            onToggleMonthYearPicker: _toggleMonthYearPicker,
+            onPreviousMonth:
+                () => setState(() {
+                  displayedMonth = DateTime(
+                    displayedMonth.year,
+                    displayedMonth.month - 1,
+                  );
+                }),
+            onNextMonth:
+                () => setState(() {
+                  displayedMonth = DateTime(
+                    displayedMonth.year,
+                    displayedMonth.month + 1,
+                  );
+                }),
+          ),
 
         const SizedBox(height: 12),
 
@@ -293,65 +332,72 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
         if (showMonthYearPicker)
           MonthYearPicker(
             initialDate: displayedMonth,
-            onDateChanged: (newDate) => setState(() {
-              displayedMonth = DateTime(newDate.year, newDate.month);
+            onDateChanged:
+                (newDate) => setState(() {
+                  displayedMonth = DateTime(newDate.year, newDate.month);
 
-              if (isFrom) {
-                // Preserve the day when changing month/year
-                fromDate = DateTime(
-                    newDate.year,
-                    newDate.month,
-                    min(
+                  if (isFrom) {
+                    // Preserve the day when changing month/year
+                    fromDate = DateTime(
+                      newDate.year,
+                      newDate.month,
+                      min(
                         fromDate.day,
-                        DateTime(newDate.year, newDate.month + 1, 0).day
-                    )
-                );
-                pickedFromDate = true;
+                        DateTime(newDate.year, newDate.month + 1, 0).day,
+                      ),
+                    );
+                    pickedFromDate = true;
 
-                if (!widget.isRangePicker) {
-                  widget.onDateSelected?.call(fromDate);
-                } else {
-                  _notifyRangeChanged();
-                }
-              } else {
-                // Preserve the day when changing month/year
-                toDate = DateTime(
-                    newDate.year,
-                    newDate.month,
-                    min(
+                    if (!widget.isRangePicker) {
+                      widget.onDateSelected?.call(fromDate);
+                    } else {
+                      _notifyRangeChanged();
+                    }
+                  } else {
+                    // Preserve the day when changing month/year
+                    toDate = DateTime(
+                      newDate.year,
+                      newDate.month,
+                      min(
                         toDate.day,
-                        DateTime(newDate.year, newDate.month + 1, 0).day
-                    )
-                );
-                pickedToDate = true;
-                _notifyRangeChanged();
-              }
-            }),
+                        DateTime(newDate.year, newDate.month + 1, 0).day,
+                      ),
+                    );
+                    pickedToDate = true;
+                    _notifyRangeChanged();
+                  }
+                }),
           )
         else
-        // Calendar grid for day selection
+          // Calendar grid for day selection
           CalendarGrid(
+            weekdaylabel: widget.showWeekdayLabels,
             month: displayedMonth.month,
             year: displayedMonth.year,
             selected: isFrom ? fromDate : toDate,
-            onDaySelected: (day) => setState(() {
-              final date = DateTime(displayedMonth.year, displayedMonth.month, day);
+            onDaySelected:
+                (day) => setState(() {
+                  final date = DateTime(
+                    displayedMonth.year,
+                    displayedMonth.month,
+                    day,
+                  );
 
-              if (isFrom) {
-                fromDate = date;
-                pickedFromDate = true;
+                  if (isFrom) {
+                    fromDate = date;
+                    pickedFromDate = true;
 
-                if (!widget.isRangePicker) {
-                  widget.onDateSelected?.call(fromDate);
-                } else {
-                  _notifyRangeChanged();
-                }
-              } else {
-                toDate = date;
-                pickedToDate = true;
-                _notifyRangeChanged();
-              }
-            }),
+                    if (!widget.isRangePicker) {
+                      widget.onDateSelected?.call(fromDate);
+                    } else {
+                      _notifyRangeChanged();
+                    }
+                  } else {
+                    toDate = date;
+                    pickedToDate = true;
+                    _notifyRangeChanged();
+                  }
+                }),
           ),
       ],
     );
@@ -361,7 +407,15 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   int min(int a, int b) => a < b ? a : b;
 }
 
-enum PickerType { none, fromDate, toDate, fromTime, toTime, singleDate, singleTime }
+enum PickerType {
+  none,
+  fromDate,
+  toDate,
+  fromTime,
+  toTime,
+  singleDate,
+  singleTime,
+}
 
 class CalendarHeader extends StatelessWidget {
   final String monthYearText;
@@ -392,9 +446,9 @@ class CalendarHeader extends StatelessWidget {
               Text(
                 monthYearText,
                 style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Color.fromRGBO(28, 121, 212, 1)
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color.fromRGBO(28, 121, 212, 1),
                 ),
               ),
               Icon(
@@ -412,11 +466,17 @@ class CalendarHeader extends StatelessWidget {
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.chevron_left, color: Color.fromRGBO(28, 121, 212, 1)),
+              icon: const Icon(
+                Icons.chevron_left,
+                color: Color.fromRGBO(28, 121, 212, 1),
+              ),
               onPressed: onPreviousMonth,
             ),
             IconButton(
-              icon: const Icon(Icons.chevron_right, color: Color.fromRGBO(28, 121, 212, 1)),
+              icon: const Icon(
+                Icons.chevron_right,
+                color: Color.fromRGBO(28, 121, 212, 1),
+              ),
               onPressed: onNextMonth,
             ),
           ],
@@ -430,6 +490,7 @@ class CalendarGrid extends StatelessWidget {
   final int month, year;
   final DateTime selected;
   final ValueChanged<int> onDaySelected;
+  final bool weekdaylabel;
 
   const CalendarGrid({
     Key? key,
@@ -437,6 +498,7 @@ class CalendarGrid extends StatelessWidget {
     required this.year,
     required this.selected,
     required this.onDaySelected,
+    this.weekdaylabel = true,
   }) : super(key: key);
 
   @override
@@ -445,27 +507,42 @@ class CalendarGrid extends StatelessWidget {
     final firstWeekday = DateTime(year, month, 1).weekday % 7;
 
     // Days of week labels
-    final List<String> daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    final List<String> daysOfWeek = [
+      'Sun',
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+    ];
 
     return Column(
       children: [
         // Days of week header row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: daysOfWeek.map((day) => Expanded(
-            child: Center(
-              child: Text(
-                day,
-                style: const TextStyle(
-                  color: Color.fromRGBO(60, 60, 67, 0.3),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          )).toList(),
-        ),
-        const SizedBox(height: 8),
+        if (weekdaylabel) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children:
+                daysOfWeek
+                    .map(
+                      (day) => Expanded(
+                        child: Center(
+                          child: Text(
+                            day,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(60, 60, 67, 0.3),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+          ),
+          const SizedBox(height: 8),
+        ],
         // Calendar grid
         GridView.builder(
           shrinkWrap: true,
@@ -478,7 +555,10 @@ class CalendarGrid extends StatelessWidget {
           itemBuilder: (context, index) {
             if (index < firstWeekday) return const SizedBox.shrink();
             final day = index - firstWeekday + 1;
-            final isSel = selected.year == year && selected.month == month && selected.day == day;
+            final isSel =
+                selected.year == year &&
+                selected.month == month &&
+                selected.day == day;
 
             return GestureDetector(
               onTap: () => onDaySelected(day),
@@ -513,23 +593,28 @@ class PillText extends StatelessWidget {
   final Color color;
   final bool isCalender;
 
-  const PillText(this.text, this.color, {Key? key, this.isCalender = false}) : super(key: key);
+  const PillText(this.text, this.color, {Key? key, this.isCalender = false})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: isCalender? const EdgeInsets.symmetric(horizontal: 14, vertical: 8) : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding:
+          isCalender
+              ? const EdgeInsets.symmetric(horizontal: 14, vertical: 8)
+              : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-          color: isCalender? Color(0xFFF4F4F4) : Colors.grey.shade100,
-          borderRadius: isCalender ? BorderRadius.circular(8) : BorderRadius.circular(4)
+        color: isCalender ? Color(0xFFF4F4F4) : Colors.grey.shade100,
+        borderRadius:
+            isCalender ? BorderRadius.circular(8) : BorderRadius.circular(4),
       ),
       child: Text(
-          text,
-          style: TextStyle(
-              fontSize: isCalender? 16 : 14,
-              fontWeight: FontWeight.w400,
-              color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5)
-          )
+        text,
+        style: TextStyle(
+          fontSize: isCalender ? 16 : 14,
+          fontWeight: FontWeight.w400,
+          color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5),
+        ),
       ),
     );
   }
@@ -561,18 +646,29 @@ class DateTimeRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          ),
           const Spacer(),
           if (date != null)
             GestureDetector(
               onTap: onDateTap,
-              child: PillText(date!, dateColor ?? Colors.black, isCalender: true,),
+              child: PillText(
+                date!,
+                dateColor ?? Colors.black,
+                isCalender: true,
+              ),
             ),
           if (date != null && time != null) const SizedBox(width: 8),
           if (time != null)
             GestureDetector(
               onTap: onTimeTap,
-              child: PillText(time!, timeColor ?? Colors.black, isCalender: true,),
+              child: PillText(
+                time!,
+                timeColor ?? Colors.black,
+                isCalender: true,
+              ),
             ),
         ],
       ),
@@ -602,7 +698,8 @@ class RepeatRow extends StatelessWidget {
         final RenderBox box = context.findRenderObject() as RenderBox;
         final Offset offset = box.localToGlobal(Offset.zero);
         final Size size = box.size;
-        final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+        final RenderBox overlay =
+            Overlay.of(context).context.findRenderObject() as RenderBox;
 
         // Popup menu positioned above the widget
         final RelativeRect pos = RelativeRect.fromLTRB(
@@ -611,7 +708,6 @@ class RepeatRow extends StatelessWidget {
           overlay.size.width - offset.dx - size.width - 16.5,
           offset.dy,
         );
-
 
         final items = <PopupMenuEntry<String>>[];
 
@@ -630,8 +726,10 @@ class RepeatRow extends StatelessWidget {
                     if (options[i] == selectedValue)
                       const Icon(Icons.check, size: 16, color: Colors.black)
                     else
-                      const SizedBox(width: 16), // Placeholder to align text
-                    const SizedBox(width: 4), // Right margin after icon
+                      const SizedBox(width: 16),
+                    // Placeholder to align text
+                    const SizedBox(width: 4),
+                    // Right margin after icon
                     // const SizedBox(width: 0), // Optional: spacing fine-tuning
                     Expanded(
                       child: Text(
@@ -648,12 +746,6 @@ class RepeatRow extends StatelessWidget {
               ),
             ),
           );
-
-          // if (i < options.length - 1) {
-          //   items.add(
-          //     const PopupMenuDivider(height: 1),
-          //   );
-          // }
           if (i < options.length - 1) {
             items.add(
               PopupMenuItem<String>(
@@ -668,8 +760,6 @@ class RepeatRow extends StatelessWidget {
             );
           }
         }
-
-
 
         final choice = await showMenu<String>(
           context: context,
@@ -691,15 +781,22 @@ class RepeatRow extends StatelessWidget {
             Text(label, style: const TextStyle(fontSize: 16)),
             const Spacer(),
             Text(
-                value,
-                style: const TextStyle(fontSize: 16, color: Color(0xFF444444))
+              value,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF444444)),
             ),
             // const SizedBox(width: 4),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-              child: Image.asset('assets/icons/scheduling/booking/img.png', width: 8, height: 20,),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 5.0,
+              ),
+              child: Image.asset(
+                'assets/icons/scheduling/booking/img.png',
+                width: 8,
+                height: 20,
+              ),
               // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
-            )
+            ),
             // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
           ],
         ),
@@ -726,12 +823,13 @@ class MonthYearPicker extends StatelessWidget {
         mode: CupertinoDatePickerMode.monthYear,
         initialDateTime: initialDate,
         minimumDate: DateTime(DateTime.now().year - 100),
-        maximumDate: DateTime(2099,12),
+        maximumDate: DateTime(2099, 12),
         onDateTimeChanged: onDateChanged,
       ),
     );
   }
 }
+
 // DateTime(DateTime.now().year + 100, 12),
 class TimePicker extends StatelessWidget {
   final TimeOfDay initialTime;
@@ -751,11 +849,14 @@ class TimePicker extends StatelessWidget {
         child: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.time,
           initialDateTime: DateTime(
-              0, 0, 0,
-              initialTime.hour,
-              initialTime.minute
+            0,
+            0,
+            0,
+            initialTime.hour,
+            initialTime.minute,
           ),
-          onDateTimeChanged: (val) => onTimeChanged(TimeOfDay.fromDateTime(val)),
+          onDateTimeChanged:
+              (val) => onTimeChanged(TimeOfDay.fromDateTime(val)),
         ),
       ),
     );

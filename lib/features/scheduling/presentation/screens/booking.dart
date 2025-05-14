@@ -1,7 +1,10 @@
 import 'package:ers_linux/features/scheduling/presentation/screens/NotesPageScreen.dart';
+import 'package:ers_linux/features/scheduling/presentation/widgets/CustomContent.dart';
 import 'package:ers_linux/shared/constants/text_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../utils/showBottomSheet.dart';
+import '../widgets/CustomTextField.dart';
 import '../widgets/resource_component.dart';
 import '../widgets/unifiedCalender.dart';
 import '../widgets/unifiedContainerTile.dart';
@@ -19,6 +22,7 @@ class _BookingFormState extends State<BookingForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _fractionController = TextEditingController();
+  final GlobalKey _confirmedKey = GlobalKey();
 
   @override
   void dispose() {
@@ -33,6 +37,83 @@ class _BookingFormState extends State<BookingForm> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Color.fromRGBO(245, 250, 255, 1),
+        leadingWidth: MediaQuery.of(context).size.width,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5, bottom: 17.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    //todo : to use the SVG icon rather than this
+                    SizedBox(
+                      width: 16,
+                      height: 30,
+                      child: Icon(Icons.chevron_left_rounded, size: 30),
+                    ),
+                    SizedBox(width: 20),
+                    Text(
+                      'Booking',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Color.fromRGBO(39, 39, 39, 1),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0, bottom: 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromRGBO(16, 24, 40, 0.05),
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(28, 121, 212, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          8,
+                        ), // Rounded corners
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                    ),
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        // fontFamily: 'Inter'
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      /*
+      AppBar(
         backgroundColor: Color.fromRGBO(245, 250, 255, 1),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
@@ -84,6 +165,7 @@ class _BookingFormState extends State<BookingForm> {
           ),
         ],
       ),
+       */
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(20.0),
@@ -145,6 +227,21 @@ class _BookingFormState extends State<BookingForm> {
                   'Yearly',
                   'Custom',
                 ],
+                onRepeatSelected: (value) {
+                  if (value == 'Custom') {
+                    BottomSheetService.showCustomBottomSheet(
+                      context: context,
+                      child: BottomSheetOptions(
+                        title: 'Custom',
+                        unifiedcontainercontent : Column(
+                          children: [
+                            FrequencyUnitSelector()
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                },
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(
@@ -231,18 +328,9 @@ class _BookingFormState extends State<BookingForm> {
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Date',
-                // itemText: _selectedDate == null
-                //     ? ''
-                //     : DateFormat('d MMM yyyy').format(_selectedDate),
                 iconPath: 'assets/icons/scheduling/booking/date.svg',
                 interactionType: TileInteractionType.bottomSheet,
-                fullSizeBottomSheet: true,
-                // onTextChanged: (formatted) {
-                //   setState(() {
-                //     // parse it back, or directly store a String if you don't need DateTime
-                //     _selectedDate = DateFormat('d MMM yyyy').parse(formatted);
-                //   });
-                // },
+                fullSizeBottomSheet: false,
                 bottomSheetContent: const BottomSheetOptions(
                   title: 'Date',
                   isDateWidget: true,
@@ -324,14 +412,11 @@ class _BookingFormState extends State<BookingForm> {
                 ),
               ),
               SizedBox(height: 24),
-              // //todo start from here for the color
               UnifiedContainerTile(
                 title: 'Priority',
                 iconPath: 'assets/icons/scheduling/booking/label.svg',
                 interactionType: TileInteractionType.bottomSheet,
-                bottomSheetContent: BottomSheetOptions(
-                  isPriority: true,
-                ),
+                bottomSheetContent: BottomSheetOptions(isPriority: true),
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(
@@ -390,7 +475,6 @@ class _BookingFormState extends State<BookingForm> {
                   title: 'Date & Time',
                   isDateWidget: true,
                   isTimeWidget: true,
-
                 ),
               ),
               SizedBox(height: 24),
@@ -428,6 +512,7 @@ class _BookingFormState extends State<BookingForm> {
                   ],
                 ),
               ),
+              SizedBox(height: 24),
               Row(
                 children: [
                   Text(

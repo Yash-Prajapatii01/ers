@@ -1,3 +1,4 @@
+import 'package:ers_linux/features/scheduling/presentation/utils/showBottomSheet.dart';
 import 'package:ers_linux/features/scheduling/presentation/widgets/unifiedContainerTile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -55,17 +56,33 @@ class _ResourceSelectorState extends State<ResourceSelector> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: const Color.fromRGBO(244, 244, 244, 1),
-                backgroundImage: selectedAvatarUrl != null
-                    ? NetworkImage(selectedAvatarUrl!)
-                    : null,
-                child: selectedAvatarUrl == null
-                    ? SvgPicture.asset(
-                  'assets/icons/scheduling/booking/add_resource.svg',
-                )
-                    : null,
+              GestureDetector(
+                onTap: () => BottomSheetService.showCustomBottomSheet(
+                  context: context,
+                  child: BottomSheetOptions(
+                    title: 'Resources',
+                    isSearchEnabled: true,
+                    SearchHintText: 'Search for Resources',
+                    options: [
+                      'Yash',
+                      'Lorem',
+                      'Ipsum',
+                      'Albert',
+                    ],
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: const Color.fromRGBO(244, 244, 244, 1),
+                  backgroundImage: selectedAvatarUrl != null
+                      ? NetworkImage(selectedAvatarUrl!)
+                      : null,
+                  child: selectedAvatarUrl == null
+                      ? SvgPicture.asset(
+                    'assets/icons/scheduling/booking/add_resource.svg',
+                  )
+                      : null,
+                ),
               ),
               const SizedBox(width: 15),
               if (showSeparator)
