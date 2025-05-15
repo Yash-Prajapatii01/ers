@@ -54,7 +54,7 @@ class _ColorPickerGridState extends State<ColorPickerGrid> {
       children: [
         // Custom palette always visible on top
         CustomColorPicker(
-          key: _colorPickerKey, // Add the key to access the state
+          key: _colorPickerKey,
           initialColor: selectedColor,
           onColorChanged: (Color color) {
             changeColor(color);
@@ -265,7 +265,7 @@ class _SaturationBrightnessPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
 
-    // White to pure color (saturation)
+
     final paintSatGrad =
     Paint()
       ..shader = LinearGradient(

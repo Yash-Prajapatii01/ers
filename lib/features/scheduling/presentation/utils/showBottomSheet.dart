@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/models/resource.dart';
 import '../widgets/ColorPicker.dart';
 import '../widgets/CustomTextField.dart';
 import '../widgets/DDMS.dart';
@@ -39,6 +40,9 @@ class BottomSheetService {
     if (selected == null) return;
 
     // Handle different selection formats
+    if (selected is Resource) {
+      onSelected?.call({'resource': selected, 'type': 'resource'});
+    }
     if (selected is Map<String, dynamic> &&
         selected['label'] is String &&
         selected['color'] is Color) {
@@ -80,6 +84,7 @@ class BottomSheetOptions extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final DateTime? initialDate;
   final TimeOfDay? initialFromTime;
+  final List<Resource>? resourceOptions;
 
   const BottomSheetOptions({
     super.key,
@@ -93,8 +98,7 @@ class BottomSheetOptions extends StatefulWidget {
     this.isTimeWidget = false,
     this.isDonethere = true,
     this.DDMS = false,
-    this.showCheckboxes =
-        true, // Default to checkbox mode for backward compatibility
+    this.showCheckboxes = true,
     this.isColorPalleteNeeded = false,
     this.initialSelectedOptions,
     this.inputFormatters,
@@ -104,6 +108,7 @@ class BottomSheetOptions extends StatefulWidget {
     this.isPriority,
     this.SearchHintText = 'Search',
     this.unifiedcontainercontent,
+    this.resourceOptions,
     // this.isFTRCalender,
   });
 
@@ -123,16 +128,17 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
   late Color _localColor;
   String _pickedLabel = 'None';
   Color _pickedColor = Colors.transparent;
+  List<Resource> _filteredResources = [];
 
   @override
   void initState() {
     super.initState();
-
     _localColor = Colors.transparent;
     _localDate = widget.initialDate ?? DateTime.now();
     _localTime = widget.initialFromTime ?? TimeOfDay.now();
 
     _filteredOptions = widget.options ?? [];
+    _filteredResources = widget.resourceOptions ?? [];
     if (widget.DDMS == true && widget.initialSelectedOptions != null) {
       _ddmsSelections.addAll(widget.initialSelectedOptions!);
     }
@@ -148,6 +154,10 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
           (widget.options ?? [])
               .where((o) => o.toLowerCase().contains(q))
               .toList();
+
+      _filteredResources = (widget.resourceOptions ?? [])
+          .where((r) => r.name.toLowerCase().contains(q))
+          .toList();
     });
   }
 
@@ -201,6 +211,65 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
     Navigator.pop(context, result);
     widget.onDone?.call();
   }
+
+  Widget _buildResourceOptionsList() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: ListView.separated(
+        itemCount: _filteredResources.length,
+        separatorBuilder: (_, __) => const Divider(height: 0.5,thickness: 0.7, color: Color.fromRGBO(0, 0, 0, 0.12),),
+        itemBuilder: (ctx, i) {
+          final resource = _filteredResources[i];
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.pop(context, resource);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 0,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(resource.imageUrl),
+                      radius: 25,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            resource.name,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            resource.designation,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color.fromRGBO(102, 112, 133, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +412,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
   );
 
   Widget _buildContent() {
-    if(widget.unifiedcontainercontent != null){
+    if (widget.unifiedcontainercontent != null) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: widget.unifiedcontainercontent!,
@@ -442,54 +511,182 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
         showCheckboxes: widget.showCheckboxes ?? true,
       );
     }
-
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: ListView.separated(
-          separatorBuilder:
-              (_, __) => const Divider(
-                height: 0.5,
-                thickness: 0.7,
-                color: Color.fromRGBO(0, 0, 0, 0.12),
-              ),
+    // Default single-selection options (String or Resource)
+    if ((widget.resourceOptions != null && widget.resourceOptions!.isNotEmpty)) {
+      return Expanded(
+        child: _buildResourceOptionsList(),
+      );
+    } else {
+      return Expanded(
+        child: ListView.builder(
           itemCount: _filteredOptions.length,
-          padding: EdgeInsets.zero,
-          itemBuilder: (ctx, i) {
-            final opt = _filteredOptions[i];
-            final sel = opt == _selectedOption;
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  setState(() => _selectedOption = opt);
-                  if (widget.isDonethere == false) Navigator.pop(context, opt);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 0,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          opt,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      if (sel) const Icon(Icons.check, color: Colors.black),
-                    ],
-                  ),
-                ),
-              ),
+          itemBuilder: (_, index) {
+            final item = _filteredOptions[index];
+            return RadioListTile<String>(
+              title: Text(item),
+              value: item,
+              groupValue: _selectedOption,
+              onChanged: (val) {
+                setState(() {
+                  _selectedOption = val!;
+                });
+              },
             );
           },
         ),
-      ),
-    );
+      );
+    }
+
+    // return Expanded( //here is the resource thing is worked on !!
+    //   child: Padding(
+    //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    //     child: widget.DDMS == false && widget.resourceOptions != null && widget.resourceOptions!.isNotEmpty
+    //         ? ListView.separated(
+    //       separatorBuilder: (_, __) => const Divider(
+    //         height: 0.5,
+    //         thickness: 0.7,
+    //         color: Color.fromRGBO(0, 0, 0, 0.12),
+    //       ),
+    //       itemCount: _filteredResources.length,
+    //       itemBuilder: (ctx, i) {
+    //         final resource = _filteredResources[i];
+    //         return Material(
+    //           color: Colors.transparent,
+    //           child: InkWell(
+    //             onTap: () {
+    //               Navigator.pop(context, resource);
+    //             },
+    //             child: Padding(
+    //               padding: const EdgeInsets.symmetric(
+    //                 horizontal: 0,
+    //                 vertical: 8,
+    //               ),
+    //               child: Row(
+    //                 children: [
+    //                   CircleAvatar(
+    //                     backgroundImage: NetworkImage(resource.imageUrl),
+    //                     radius: 25,
+    //                   ),
+    //                   const SizedBox(width: 16),
+    //                   Expanded(
+    //                     child: Column(
+    //                       crossAxisAlignment: CrossAxisAlignment.start,
+    //                       children: [
+    //                         Text(
+    //                           resource.name,
+    //                           style: const TextStyle(
+    //                             fontSize: 14,
+    //                             fontWeight: FontWeight.w500,
+    //                           ),
+    //                         ),
+    //                         Text(
+    //                           resource.designation,
+    //                           style: const TextStyle(
+    //                             fontSize: 12,
+    //                             color: Color.fromRGBO(102, 112, 133, 1),
+    //                           ),
+    //                         ),
+    //                       ],
+    //                     ),
+    //                   ),
+    //                 ],
+    //               ),
+    //             ),
+    //           ),
+    //         );
+    //       },
+    //     )
+    //         : ListView.separated(
+    //       separatorBuilder: (_, __) => const Divider(
+    //         height: 0.5,
+    //         thickness: 0.7,
+    //         color: Color.fromRGBO(0, 0, 0, 0.12),
+    //       ),
+    //       itemCount: _filteredOptions.length,
+    //       padding: EdgeInsets.zero,
+    //       itemBuilder: (ctx, i) {
+    //         final opt = _filteredOptions[i];
+    //         final sel = opt == _selectedOption;
+    //         return Material(
+    //           color: Colors.transparent,
+    //           child: InkWell(
+    //             onTap: () {
+    //               setState(() => _selectedOption = opt);
+    //               if (widget.isDonethere == false) Navigator.pop(context, opt);
+    //             },
+    //             child: Padding(
+    //               padding: const EdgeInsets.symmetric(
+    //                 horizontal: 0,
+    //                 vertical: 10,
+    //               ),
+    //               child: Row(
+    //                 children: [
+    //                   Expanded(
+    //                     child: Text(
+    //                       opt,
+    //                       style: const TextStyle(
+    //                         fontSize: 16,
+    //                         fontWeight: FontWeight.w400,
+    //                       ),
+    //                     ),
+    //                   ),
+    //                   if (sel) const Icon(Icons.check, color: Colors.black),
+    //                 ],
+    //               ),
+    //             ),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   ),
+    // );
+    // return Expanded(
+    //   child: Padding(
+    //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    //     child: ListView.separated(
+    //       separatorBuilder:
+    //           (_, __) => const Divider(
+    //             height: 0.5,
+    //             thickness: 0.7,
+    //             color: Color.fromRGBO(0, 0, 0, 0.12),
+    //           ),
+    //       itemCount: _filteredOptions.length,
+    //       padding: EdgeInsets.zero,
+    //       itemBuilder: (ctx, i) {
+    //         final opt = _filteredOptions[i];
+    //         final sel = opt == _selectedOption;
+    //         return Material(
+    //           color: Colors.transparent,
+    //           child: InkWell(
+    //             onTap: () {
+    //               setState(() => _selectedOption = opt);
+    //               if (widget.isDonethere == false) Navigator.pop(context, opt);
+    //             },
+    //             child: Padding(
+    //               padding: const EdgeInsets.symmetric(
+    //                 horizontal: 0,
+    //                 vertical: 10,
+    //               ),
+    //               child: Row(
+    //                 children: [
+    //                   Expanded(
+    //                     child: Text(
+    //                       opt,
+    //                       style: const TextStyle(
+    //                         fontSize: 16,
+    //                         fontWeight: FontWeight.w400,
+    //                       ),
+    //                     ),
+    //                   ),
+    //                   if (sel) const Icon(Icons.check, color: Colors.black),
+    //                 ],
+    //               ),
+    //             ),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   ),
+    // );
   }
 }

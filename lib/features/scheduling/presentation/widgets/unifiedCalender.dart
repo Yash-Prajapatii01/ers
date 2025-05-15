@@ -1,6 +1,18 @@
+import 'package:ers_linux/features/scheduling/presentation/widgets/CustomContent.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+enum PickerType {
+  none,
+  fromDate,
+  toDate,
+  fromTime,
+  toTime,
+  singleDate,
+  singleTime,
+}
+
 
 class UnifiedCalendar extends StatefulWidget {
   final DateTime? initialDate;
@@ -50,6 +62,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   late TimeOfDay fromTime;
   late DateTime toDate;
   late TimeOfDay toTime;
+  List<String> endRepeatOption = ['After', 'On Date'];
 
   // Selection flags for coloring
   bool pickedFromDate = false;
@@ -60,12 +73,19 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   // Calendar display state
   late DateTime displayedMonth;
   bool showMonthYearPicker = false;
+  DateTime AfterDate = DateTime.now();
 
   // Active picker
   PickerType activePicker = PickerType.none;
 
   // Repeat option (for range mode)
-  String repeat = '';
+  String repeatRow = '';
+
+  String endRepeat = '';
+  String afterRow = '1';
+
+  bool isActiveCalender = false;
+  bool isAfterSlider = false;
 
   // Format helpers
   String _formatDate(DateTime date) => DateFormat('d MMM yyyy').format(date);
@@ -96,6 +116,21 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
       }
     });
   }
+  List<int> _getOptionsBasedOnRepeat(String repeat) {
+    switch (repeat) {
+      case 'Daily':
+        return List.generate(90, (i) => i + 1);
+      case 'Weekly':
+        return List.generate(52, (i) => i + 1);
+      case 'Monthly':
+        return List.generate(24, (i) => i + 1);
+      case 'Yearly':
+        return List.generate(5, (i) => i + 1);
+      default:
+      // Default to daily options if no repeat is selected
+        return List.generate(90, (i) => i + 1);
+    }
+  }
 
   @override
   void initState() {
@@ -123,10 +158,16 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
 
   void _onRepeatSelected(String value) {
     setState(() {
-      repeat = value;
+      repeatRow = value;
       if (widget.onRepeatSelected != null) {
         widget.onRepeatSelected!(value);
       }
+    });
+  }
+
+  void _onEndRepeatSelected(String value) {
+    setState(() {
+      endRepeat = value;
     });
   }
 
@@ -139,7 +180,8 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.all(16),
+      padding:
+          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.all(16),
       decoration:
           widget.isRangePicker && !widget.remmoveInternalPadding
               ? BoxDecoration(
@@ -289,12 +331,187 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
               ),
               RepeatRow(
                 label: 'Repeat',
-                value: repeat.isEmpty ? '' : repeat,
+                value: repeatRow.isEmpty ? '' : repeatRow,
                 options: widget.repeatOptions!,
-                selectedValue: repeat.isEmpty ? '' : repeat,
+                selectedValue: repeatRow.isEmpty ? '' : repeatRow,
                 onSelected: _onRepeatSelected,
               ),
             ],
+            if (repeatRow.isNotEmpty &&
+                repeatRow != 'None' &&
+                repeatRow != 'Custom') ...[
+              const Divider(
+                thickness: 0.7,
+                color: Color.fromRGBO(102, 112, 133, 0.2),
+              ),
+              EndRepeatRow(
+                label: 'End Repeat',
+                value: endRepeat.isEmpty ? '' : endRepeat,
+                options: endRepeatOption,
+                selectedValue: endRepeat.isEmpty ? '' : endRepeat,
+                onSelected: _onEndRepeatSelected,
+              ),
+            ],
+            if (endRepeat == 'After') ...[
+              const Divider(
+                thickness: 0.7,
+                color: Color.fromRGBO(102, 112, 133, 0.2),
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Text('After'),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isAfterSlider = !isAfterSlider;
+                      });
+                      print(isAfterSlider);
+                    },
+                    child: PillText(afterRow, Colors.white),
+                  ),
+                ],
+              ),
+
+              // This is the key change - move the picker inside the After section
+              if(isAfterSlider) ...[
+                const Divider(
+                  thickness: 0.7,
+                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                ),
+                Center(
+                  child: CustomCupertinoPicker(
+                    singleColumnOptions: _getOptionsBasedOnRepeat(repeatRow),
+                    onSingleColumnSelected: (date){
+                      setState(() {  // Add setState here
+                        afterRow = date.toString();
+                      });
+                    },
+                  ),
+                )
+              ]
+            ],
+            // Then, the On Date section without the CustomCupertinoPicker
+            if (endRepeat == 'On Date') ...[
+              const Divider(
+                thickness: 0.7,
+                color: Color.fromRGBO(102, 112, 133, 0.2),
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Text('On Date'),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isActiveCalender = !isActiveCalender;
+                      });
+                    },
+                    child: PillText(
+                      (DateFormat(
+                        'd MMMM y',
+                      ).format(AfterDate).toString()),
+                      Colors.blue,
+                      isCalender: true,
+                    ),
+                  ),
+                ],
+              ),
+              if (isActiveCalender) ...[
+                const Divider(
+                  thickness: 0.7,
+                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                ),
+                UnifiedCalendar(
+                  initialDate: DateTime.now(),
+                  onDateSelected: (date) {
+                    setState(() {
+                      AfterDate = date;
+                    });
+                  },
+                  remmoveInternalPadding: true,
+                ),
+              ],
+            ],
+            // if (endRepeat == 'After') ...[
+            //   const Divider(
+            //     thickness: 0.7,
+            //     color: Color.fromRGBO(102, 112, 133, 0.2),
+            //   ),
+            //   SizedBox(height: 8),
+            //   Row(
+            //     children: [
+            //       Text('After'),
+            //       Spacer(),
+            //       GestureDetector(
+            //         onTap: () {
+            //           setState(() {
+            //             isAfterSlider = !isAfterSlider;
+            //           });
+            //           print(isAfterSlider);
+            //         },
+            //         child: PillText( afterRow, Colors.white),
+            //       ),
+            //     ],
+            //   ),
+            // ],
+            // if (endRepeat == 'On Date') ...[
+            //   const Divider(
+            //     thickness: 0.7,
+            //     color: Color.fromRGBO(102, 112, 133, 0.2),
+            //   ),
+            //   SizedBox(height: 8),
+            //   Row(
+            //     children: [
+            //       Text('On Date'),
+            //       Spacer(),
+            //       GestureDetector(
+            //         onTap: () {
+            //           setState(() {
+            //             isActiveCalender = !isActiveCalender;
+            //           });
+            //           // CalendarGrid(month: 5, year: 2025, selected: DateTime.now(), onDaySelected: (int value) {  },);
+            //         },
+            //         child: PillText(
+            //           (DateFormat(
+            //             //todo Solve the problem of the Text Color
+            //             'd MMMM y',
+            //           ).format(AfterDate).toString()),
+            //           Colors.blue,
+            //           isCalender: true,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            //   if (isActiveCalender) ...[
+            //     const Divider(
+            //       thickness: 0.7,
+            //       color: Color.fromRGBO(102, 112, 133, 0.2),
+            //     ),
+            //     UnifiedCalendar(
+            //       initialDate: DateTime.now(),
+            //       onDateSelected: (date) {
+            //         setState(() {
+            //           AfterDate = date;
+            //         });
+            //       },
+            //     ),
+            //   ],
+            //   if(isAfterSlider) ...[
+            //     const Divider(
+            //       thickness: 0.7,
+            //       color: Color.fromRGBO(102, 112, 133, 0.2),
+            //     ),
+            //     CustomCupertinoPicker(
+            //       singleColumnOptions: List.generate(90, (i) => i + 1),
+            //       onSingleColumnSelected: (date){
+            //         afterRow = date;
+            //       },
+            //     )
+            //   ]
+            // ],
           ],
         ],
       ),
@@ -407,14 +624,171 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   int min(int a, int b) => a < b ? a : b;
 }
 
-enum PickerType {
-  none,
-  fromDate,
-  toDate,
-  fromTime,
-  toTime,
-  singleDate,
-  singleTime,
+class PillText extends StatelessWidget {
+  final String text;
+  final Color color;
+  final bool isCalender;
+  // final CustomCupertinoPicker? customCupertinoPicker;
+
+  const PillText(
+    this.text,
+    this.color, {
+    Key? key,
+    this.isCalender = false,
+    // this.customCupertinoPicker,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          isCalender
+              ? const EdgeInsets.symmetric(horizontal: 14, vertical: 8)
+              : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isCalender ? Color(0xFFF4F4F4) : Colors.grey.shade100,
+        borderRadius:
+            isCalender ? BorderRadius.circular(8) : BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: isCalender ? 16 : 14,
+          fontWeight: FontWeight.w400,
+          color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5),
+        ),
+      ),
+    );
+  }
+}
+
+class EndRepeatRow extends StatelessWidget {
+  final List<String> options;
+  final String label, value;
+  final String selectedValue;
+  final ValueChanged<String> onSelected;
+
+  const EndRepeatRow({
+    super.key,
+    required this.options,
+    required this.label,
+    required this.value,
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final RenderBox box = context.findRenderObject() as RenderBox;
+        final Offset offset = box.localToGlobal(Offset.zero);
+        final Size size = box.size;
+        final RenderBox overlay =
+            Overlay.of(context).context.findRenderObject() as RenderBox;
+
+        // Popup menu positioned above the widget
+        final RelativeRect pos = RelativeRect.fromLTRB(
+          offset.dx + size.width - 200,
+          offset.dy - (51.2 * options.length) - 10.5,
+          overlay.size.width - offset.dx - size.width - 16.5,
+          offset.dy,
+        );
+
+        final items = <PopupMenuEntry<String>>[];
+
+        for (var i = 0; i < options.length; i++) {
+          items.add(
+            PopupMenuItem<String>(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              height: 48, // Based on 10 vertical padding + font height
+              value: options[i],
+              child: SizedBox(
+                width: 170,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // const SizedBox(width: 8), // Left margin before icon
+                    if (options[i] == selectedValue)
+                      const Icon(Icons.check, size: 16, color: Colors.black)
+                    else
+                      const SizedBox(width: 16),
+                    // Placeholder to align text
+                    const SizedBox(width: 4),
+                    // Right margin after icon
+                    // const SizedBox(width: 0), // Optional: spacing fine-tuning
+                    Expanded(
+                      child: Text(
+                        options[i],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color.fromRGBO(39, 39, 39, 1),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          if (i < options.length - 1) {
+            items.add(
+              PopupMenuItem<String>(
+                enabled: false, // Prevent selection
+                height: 0.7,
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 0.7,
+                  color: const Color.fromRGBO(102, 112, 133, 0.2),
+                ),
+              ),
+            );
+          }
+        }
+
+        final choice = await showMenu<String>(
+          context: context,
+          position: pos,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFFE0E0E0)),
+          ),
+          elevation: 4,
+          items: items,
+        );
+        if (choice != null) onSelected(choice);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 16)),
+            const Spacer(),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF444444)),
+            ),
+            // const SizedBox(width: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 5.0,
+              ),
+              child: Image.asset(
+                'assets/icons/scheduling/booking/img.png',
+                width: 8,
+                height: 20,
+              ),
+              // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
+            ),
+            // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class CalendarHeader extends StatelessWidget {
@@ -436,7 +810,7 @@ class CalendarHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Month-year selector with dropdown
         GestureDetector(
@@ -460,7 +834,7 @@ class CalendarHeader extends StatelessWidget {
             ],
           ),
         ),
-
+        Spacer(),
         // Previous/next month buttons
         // if(!showMonthYearPicker)
         Row(
@@ -516,35 +890,52 @@ class CalendarGrid extends StatelessWidget {
       'Fri',
       'Sat',
     ];
-
     return Column(
       children: [
         // Days of week header row
         if (weekdaylabel) ...[
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children:
-                daysOfWeek
-                    .map(
-                      (day) => Expanded(
-                        child: Center(
-                          child: Text(
-                            day,
-                            style: const TextStyle(
-                              color: Color.fromRGBO(60, 60, 67, 0.3),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
+            children: daysOfWeek.map(
+                  (day) => Expanded(
+                child: Center(
+                  child: Text(
+                    day,
+                    style: const TextStyle(
+                      color: Color.fromRGBO(60, 60, 67, 0.3),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+            ).toList(),
           ),
-          const SizedBox(height: 8),
+
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //   children:
+          //       daysOfWeek
+          //           .map(
+          //             (day) => Expanded(
+          //               child: Center(
+          //                 child: Text(
+          //                   day,
+          //                   style: const TextStyle(
+          //                     color: Color.fromRGBO(60, 60, 67, 0.3),
+          //                     fontWeight: FontWeight.w600,
+          //                     fontSize: 13,
+          //                   ),
+          //                 ),
+          //               ),
+          //             ),
+          //           )
+          //           .toList(),
+          // ),
+          // const SizedBox(height: 8),
         ],
         // Calendar grid
         GridView.builder(
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -560,12 +951,20 @@ class CalendarGrid extends StatelessWidget {
                 selected.month == month &&
                 selected.day == day;
 
+            final columnIndex = index % 7;
+            final margin = EdgeInsets.only(
+              top: 2,
+              bottom: 2,
+              left: columnIndex == 0 ? 0 : 2,
+              right: columnIndex == 6 ? 0 : 2,
+            );
+
             return GestureDetector(
               onTap: () => onDaySelected(day),
               child: Container(
                 width: 32,
                 height: 32,
-                margin: const EdgeInsets.all(2),
+                margin: margin,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSel ? Color.fromRGBO(28, 121, 212, 1) : null,
@@ -584,94 +983,6 @@ class CalendarGrid extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-}
-
-class PillText extends StatelessWidget {
-  final String text;
-  final Color color;
-  final bool isCalender;
-
-  const PillText(this.text, this.color, {Key? key, this.isCalender = false})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding:
-          isCalender
-              ? const EdgeInsets.symmetric(horizontal: 14, vertical: 8)
-              : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isCalender ? Color(0xFFF4F4F4) : Colors.grey.shade100,
-        borderRadius:
-            isCalender ? BorderRadius.circular(8) : BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: isCalender ? 16 : 14,
-          fontWeight: FontWeight.w400,
-          color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5),
-        ),
-      ),
-    );
-  }
-}
-
-class DateTimeRow extends StatelessWidget {
-  final String label;
-  final String? date;
-  final String? time;
-  final Color? dateColor;
-  final Color? timeColor;
-  final VoidCallback? onDateTap;
-  final VoidCallback? onTimeTap;
-
-  const DateTimeRow({
-    Key? key,
-    required this.label,
-    this.date,
-    this.time,
-    this.dateColor,
-    this.timeColor,
-    this.onDateTap,
-    this.onTimeTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-          ),
-          const Spacer(),
-          if (date != null)
-            GestureDetector(
-              onTap: onDateTap,
-              child: PillText(
-                date!,
-                dateColor ?? Colors.black,
-                isCalender: true,
-              ),
-            ),
-          if (date != null && time != null) const SizedBox(width: 8),
-          if (time != null)
-            GestureDetector(
-              onTap: onTimeTap,
-              child: PillText(
-                time!,
-                timeColor ?? Colors.black,
-                isCalender: true,
-              ),
-            ),
-        ],
-      ),
     );
   }
 }
@@ -800,6 +1111,62 @@ class RepeatRow extends StatelessWidget {
             // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class DateTimeRow extends StatelessWidget {
+  final String label;
+  final String? date;
+  final String? time;
+  final Color? dateColor;
+  final Color? timeColor;
+  final VoidCallback? onDateTap;
+  final VoidCallback? onTimeTap;
+
+  const DateTimeRow({
+    Key? key,
+    required this.label,
+    this.date,
+    this.time,
+    this.dateColor,
+    this.timeColor,
+    this.onDateTap,
+    this.onTimeTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          ),
+          const Spacer(),
+          if (date != null)
+            GestureDetector(
+              onTap: onDateTap,
+              child: PillText(
+                date!,
+                dateColor ?? Colors.black,
+                isCalender: true,
+              ),
+            ),
+          if (date != null && time != null) const SizedBox(width: 8),
+          if (time != null)
+            GestureDetector(
+              onTap: onTimeTap,
+              child: PillText(
+                time!,
+                timeColor ?? Colors.black,
+                isCalender: true,
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -241,10 +241,10 @@ class _BookingFormState extends State<BookingForm> {
               SizedBox(height: 24),
               ResourceSelector(
                 avatarUrls: [
-                  'https://avatar.iran.liara.run/public/19',
-                  'https://avatar.iran.liara.run/public/20',
-                  'https://avatar.iran.liara.run/public/29',
-                  'https://avatar.iran.liara.run/public/31',
+                  'https://xsgames.co/randomusers/assets/avatars/male/25.jpg',
+                  'https://xsgames.co/randomusers/assets/avatars/male/5.jpg',
+                  'https://xsgames.co/randomusers/assets/avatars/male/10.jpg',
+                  'https://xsgames.co/randomusers/assets/avatars/male/8.jpg',
                 ],
               ),
               SizedBox(height: 24),

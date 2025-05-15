@@ -61,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10.r),
                         child: Image.network(
-                          'https://avatar.iran.liara.run/public/27',
+                          'https://xsgames.co/randomusers/assets/avatars/male/20.jpg',
                           width: 100.r,
                           height: 100.r,
                           fit: BoxFit.cover,
