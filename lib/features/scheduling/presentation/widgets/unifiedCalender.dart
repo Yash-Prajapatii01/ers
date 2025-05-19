@@ -1,3 +1,4 @@
+
 import 'package:ers_linux/features/scheduling/presentation/widgets/CustomContent.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,6 @@ enum PickerType {
   singleDate,
   singleTime,
 }
-
 
 class UnifiedCalendar extends StatefulWidget {
   final DateTime? initialDate;
@@ -69,6 +69,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   bool pickedFromTime = false;
   bool pickedToDate = false;
   bool pickedToTime = false;
+  bool pickedOnDate = false;
 
   // Calendar display state
   late DateTime displayedMonth;
@@ -116,6 +117,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
       }
     });
   }
+
   List<int> _getOptionsBasedOnRepeat(String repeat) {
     switch (repeat) {
       case 'Daily':
@@ -127,7 +129,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
       case 'Yearly':
         return List.generate(5, (i) => i + 1);
       default:
-      // Default to daily options if no repeat is selected
+        // Default to daily options if no repeat is selected
         return List.generate(90, (i) => i + 1);
     }
   }
@@ -181,7 +183,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   Widget build(BuildContext context) {
     return Container(
       padding:
-          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.all(16),
+          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.all(15.5),
       decoration:
           widget.isRangePicker && !widget.remmoveInternalPadding
               ? BoxDecoration(
@@ -288,6 +290,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
           // Only show To section and Repeat options in range picker mode
           if (widget.isRangePicker) ...[
             const Divider(
+              height: 1,
               thickness: 0.7,
               color: Color.fromRGBO(102, 112, 133, 0.2),
             ),
@@ -326,6 +329,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
             if (widget.repeatOptions != null &&
                 widget.repeatOptions!.isNotEmpty) ...[
               const Divider(
+                height: 1,
                 thickness: 0.7,
                 color: Color.fromRGBO(102, 112, 133, 0.2),
               ),
@@ -341,6 +345,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                 repeatRow != 'None' &&
                 repeatRow != 'Custom') ...[
               const Divider(
+                height: 1,
                 thickness: 0.7,
                 color: Color.fromRGBO(102, 112, 133, 0.2),
               ),
@@ -352,75 +357,92 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                 onSelected: _onEndRepeatSelected,
               ),
             ],
-            if (endRepeat == 'After') ...[
+            if (endRepeat == 'After' && repeatRow != 'Custom' && repeatRow != 'None') ...[
               const Divider(
+                height: 1,
                 thickness: 0.7,
                 color: Color.fromRGBO(102, 112, 133, 0.2),
               ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('After'),
-                  Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isAfterSlider = !isAfterSlider;
-                      });
-                      print(isAfterSlider);
-                    },
-                    child: PillText(afterRow, Colors.white),
-                  ),
-                ],
+              Container(
+                height: 40,
+                padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                child: Row(
+                  children: [
+                    Text('After',style: TextStyle(
+                      fontFamily: 'Inter'
+                    ),),
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isAfterSlider = !isAfterSlider;
+                        });
+                        print(isAfterSlider);
+                      },
+                      child: PillText(afterRow, Colors.black ,radius: 8, isCalender: false,),
+                    ),
+                  ],
+                ),
               ),
 
               // This is the key change - move the picker inside the After section
-              if(isAfterSlider) ...[
+              if (isAfterSlider) ...[
+                SizedBox(height: 4,),
                 const Divider(
+                  height: 1,
                   thickness: 0.7,
                   color: Color.fromRGBO(102, 112, 133, 0.2),
                 ),
                 Center(
                   child: CustomCupertinoPicker(
                     singleColumnOptions: _getOptionsBasedOnRepeat(repeatRow),
-                    onSingleColumnSelected: (date){
-                      setState(() {  // Add setState here
+                    onSingleColumnSelected: (date) {
+                      setState(() {
+                        // Add setState here
                         afterRow = date.toString();
                       });
                     },
                   ),
-                )
-              ]
+                ),
+              ],
+
             ],
             // Then, the On Date section without the CustomCupertinoPicker
-            if (endRepeat == 'On Date') ...[
+            if (endRepeat == 'On Date' && repeatRow != 'Custom' && repeatRow != 'None') ...[
               const Divider(
+                height: 1,
                 thickness: 0.7,
                 color: Color.fromRGBO(102, 112, 133, 0.2),
               ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('On Date'),
-                  Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isActiveCalender = !isActiveCalender;
-                      });
-                    },
-                    child: PillText(
-                      (DateFormat(
-                        'd MMMM y',
-                      ).format(AfterDate).toString()),
-                      Colors.blue,
-                      isCalender: true,
+              // SizedBox(height: 4),
+              Container(
+                height: 40,
+                padding: const EdgeInsets.fromLTRB(0,4,0,0),
+                child: Row(
+                  children: [
+                    Text('On Date', style: TextStyle(
+                      fontFamily: 'Inter'
+                    ),),
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isActiveCalender = !isActiveCalender;
+                        });
+                      },
+                      child: PillText(
+                        (DateFormat('d MMMM y').format(AfterDate).toString()),
+                        pickedOnDate? Colors.blue : Colors.black,
+                        isCalender: true,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               if (isActiveCalender) ...[
+                SizedBox(height: 4,),
                 const Divider(
+                  height: 1,
                   thickness: 0.7,
                   color: Color.fromRGBO(102, 112, 133, 0.2),
                 ),
@@ -428,6 +450,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                   initialDate: DateTime.now(),
                   onDateSelected: (date) {
                     setState(() {
+                      pickedOnDate = true;
                       AfterDate = date;
                     });
                   },
@@ -533,6 +556,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                     displayedMonth.year,
                     displayedMonth.month - 1,
                   );
+
                 }),
             onNextMonth:
                 () => setState(() {
@@ -548,6 +572,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
         // Month-year picker shown when toggled
         if (showMonthYearPicker)
           MonthYearPicker(
+            // key: ValueKey(displayedMonth.toIso8601String()), //it is for syncing the Picker with < & >
             initialDate: displayedMonth,
             onDateChanged:
                 (newDate) => setState(() {
@@ -599,7 +624,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                     displayedMonth.month,
                     day,
                   );
-
+                  pickedOnDate = true;
                   if (isFrom) {
                     fromDate = date;
                     pickedFromDate = true;
@@ -627,164 +652,44 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
 class PillText extends StatelessWidget {
   final String text;
   final Color color;
+  final double? width;
+  final double? height;
+  final double radius;
   final bool isCalender;
-  // final CustomCupertinoPicker? customCupertinoPicker;
+
 
   const PillText(
     this.text,
     this.color, {
     Key? key,
     this.isCalender = false,
-    // this.customCupertinoPicker,
+    this.width,
+    this.height,
+    this.radius = 4,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          isCalender
+      //todo: isCalender work on color
+      width: width,
+      height: height,
+      // alignment: Alignment.center,
+      // padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding : isCalender
               ? const EdgeInsets.symmetric(horizontal: 14, vertical: 8)
               : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isCalender ? Color(0xFFF4F4F4) : Colors.grey.shade100,
         borderRadius:
-            isCalender ? BorderRadius.circular(8) : BorderRadius.circular(4),
+            isCalender ? BorderRadius.circular(8) : BorderRadius.circular(radius),
       ),
       child: Text(
         text,
         style: TextStyle(
+          fontFamily: 'Inter',
           fontSize: isCalender ? 16 : 14,
-          fontWeight: FontWeight.w400,
           color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5),
-        ),
-      ),
-    );
-  }
-}
-
-class EndRepeatRow extends StatelessWidget {
-  final List<String> options;
-  final String label, value;
-  final String selectedValue;
-  final ValueChanged<String> onSelected;
-
-  const EndRepeatRow({
-    super.key,
-    required this.options,
-    required this.label,
-    required this.value,
-    required this.selectedValue,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        final Offset offset = box.localToGlobal(Offset.zero);
-        final Size size = box.size;
-        final RenderBox overlay =
-            Overlay.of(context).context.findRenderObject() as RenderBox;
-
-        // Popup menu positioned above the widget
-        final RelativeRect pos = RelativeRect.fromLTRB(
-          offset.dx + size.width - 200,
-          offset.dy - (51.2 * options.length) - 10.5,
-          overlay.size.width - offset.dx - size.width - 16.5,
-          offset.dy,
-        );
-
-        final items = <PopupMenuEntry<String>>[];
-
-        for (var i = 0; i < options.length; i++) {
-          items.add(
-            PopupMenuItem<String>(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-              height: 48, // Based on 10 vertical padding + font height
-              value: options[i],
-              child: SizedBox(
-                width: 170,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // const SizedBox(width: 8), // Left margin before icon
-                    if (options[i] == selectedValue)
-                      const Icon(Icons.check, size: 16, color: Colors.black)
-                    else
-                      const SizedBox(width: 16),
-                    // Placeholder to align text
-                    const SizedBox(width: 4),
-                    // Right margin after icon
-                    // const SizedBox(width: 0), // Optional: spacing fine-tuning
-                    Expanded(
-                      child: Text(
-                        options[i],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color.fromRGBO(39, 39, 39, 1),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-          if (i < options.length - 1) {
-            items.add(
-              PopupMenuItem<String>(
-                enabled: false, // Prevent selection
-                height: 0.7,
-                padding: EdgeInsets.zero,
-                child: Container(
-                  height: 0.7,
-                  color: const Color.fromRGBO(102, 112, 133, 0.2),
-                ),
-              ),
-            );
-          }
-        }
-
-        final choice = await showMenu<String>(
-          context: context,
-          position: pos,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
-          ),
-          elevation: 4,
-          items: items,
-        );
-        if (choice != null) onSelected(choice);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Text(label, style: const TextStyle(fontSize: 16)),
-            const Spacer(),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF444444)),
-            ),
-            // const SizedBox(width: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 5.0,
-              ),
-              child: Image.asset(
-                'assets/icons/scheduling/booking/img.png',
-                width: 8,
-                height: 20,
-              ),
-              // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
-            ),
-            // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
-          ],
         ),
       ),
     );
@@ -859,7 +764,212 @@ class CalendarHeader extends StatelessWidget {
     );
   }
 }
+/*
+It is For the syncing the < & > with the time Picker
+class MonthYearPicker extends StatefulWidget {
+  final DateTime initialDate;
+  final ValueChanged<DateTime> onDateChanged;
 
+  const MonthYearPicker({
+    Key? key,
+    required this.initialDate,
+    required this.onDateChanged,
+  }) : super(key: key);
+
+  @override
+  State<MonthYearPicker> createState() => _MonthYearPickerState();
+}
+
+class _MonthYearPickerState extends State<MonthYearPicker> {
+  late DateTime selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = widget.initialDate;
+  }
+
+  @override
+  void didUpdateWidget(covariant MonthYearPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialDate != widget.initialDate) {
+      setState(() {
+        selectedDate = widget.initialDate;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      child: CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        initialDateTime: selectedDate,
+        minimumDate: DateTime(DateTime.now().year - 100),
+        maximumDate: DateTime(2099, 12),
+        onDateTimeChanged: (newDate) {
+          widget.onDateChanged(newDate);
+          setState(() => selectedDate = newDate);
+        },
+      ),
+    );
+  }
+}
+ */
+
+class MonthYearPicker extends StatelessWidget {
+  final DateTime initialDate;
+  final ValueChanged<DateTime> onDateChanged;
+
+  const MonthYearPicker({
+    Key? key,
+    required this.initialDate,
+    required this.onDateChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      child: CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        initialDateTime: initialDate,
+        minimumDate: DateTime(DateTime.now().year - 100),
+        maximumDate: DateTime(2099, 12),
+        onDateTimeChanged: onDateChanged,
+      ),
+    );
+  }
+}
+
+class EndRepeatRow extends StatelessWidget {
+  final List<String> options;
+  final String label, value;
+  final String selectedValue;
+  final ValueChanged<String> onSelected;
+
+  const EndRepeatRow({
+    super.key,
+    required this.options,
+    required this.label,
+    required this.value,
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final RenderBox box = context.findRenderObject() as RenderBox;
+        final Offset offset = box.localToGlobal(Offset.zero);
+        final Size size = box.size;
+        final RenderBox overlay =
+            Overlay.of(context).context.findRenderObject() as RenderBox;
+
+        // Popup menu positioned above the widget
+        final RelativeRect pos = RelativeRect.fromLTRB(
+          offset.dx + size.width - 200,
+          offset.dy - (51.2 * options.length) - 10.5,
+          overlay.size.width - offset.dx - size.width - 16.5,
+          offset.dy,
+        );
+
+        final items = <PopupMenuEntry<String>>[];
+
+        for (var i = 0; i < options.length; i++) {
+          items.add(
+            PopupMenuItem<String>(
+              // padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              height: 48, // Based on 10 vertical padding + font height
+              value: options[i],
+              child: SizedBox(
+                width: 170,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // const SizedBox(width: 8), // Left margin before icon
+                    if (options[i] == selectedValue)
+                      const Icon(Icons.check, size: 16, color: Colors.black)
+                    else
+                      const SizedBox(width: 16),
+                    // Placeholder to align text
+                    const SizedBox(width: 4),
+                    // Right margin after icon
+                    // const SizedBox(width: 0), // Optional: spacing fine-tuning
+                    Expanded(
+                      child: Text(
+                        options[i],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w400,
+                          color: Color.fromRGBO(39, 39, 39, 1),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          if (i < options.length - 1) {
+            items.add(
+              PopupMenuItem<String>(
+                enabled: false, // Prevent selection
+                height: 0.7,
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 0.7,
+                  color: const Color.fromRGBO(102, 112, 133, 0.2),
+                ),
+              ),
+            );
+          }
+        }
+
+        final choice = await showMenu<String>(
+          context: context,
+          position: pos,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFFE0E0E0)),
+          ),
+          elevation: 4,
+          items: items,
+        );
+        if (choice != null) onSelected(choice);
+      },
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 16, fontFamily: 'Inter')),
+            const Spacer(),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF444444), fontFamily: 'Inter'),
+            ),
+            // const SizedBox(width: 4),
+            Padding(
+              padding: EdgeInsets.fromLTRB(8.0, 5.0, 0, 5.0),
+              child: Image.asset(
+                'assets/icons/scheduling/booking/img.png',
+                width: 8,
+                height: 20,
+              ),
+              // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
+            ),
+            // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class CalendarGrid extends StatelessWidget {
   final int month, year;
   final DateTime selected;
@@ -895,20 +1005,23 @@ class CalendarGrid extends StatelessWidget {
         // Days of week header row
         if (weekdaylabel) ...[
           Row(
-            children: daysOfWeek.map(
-                  (day) => Expanded(
-                child: Center(
-                  child: Text(
-                    day,
-                    style: const TextStyle(
-                      color: Color.fromRGBO(60, 60, 67, 0.3),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ),
-            ).toList(),
+            children:
+                daysOfWeek
+                    .map(
+                      (day) => Expanded(
+                        child: Center(
+                          child: Text(
+                            day,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(60, 60, 67, 0.3),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
           ),
 
           // Row(
@@ -1025,12 +1138,13 @@ class RepeatRow extends StatelessWidget {
         for (var i = 0; i < options.length; i++) {
           items.add(
             PopupMenuItem<String>(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              // padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
               height: 48, // Based on 10 vertical padding + font height
               value: options[i],
               child: SizedBox(
                 width: 170,
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // const SizedBox(width: 8), // Left margin before icon
@@ -1047,6 +1161,7 @@ class RepeatRow extends StatelessWidget {
                         options[i],
                         style: const TextStyle(
                           fontSize: 16,
+                          fontFamily: 'Inter',
                           fontWeight: FontWeight.w400,
                           color: Color.fromRGBO(39, 39, 39, 1),
                         ),
@@ -1085,22 +1200,24 @@ class RepeatRow extends StatelessWidget {
         );
         if (choice != null) onSelected(choice);
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Text(label, style: const TextStyle(fontSize: 16)),
+            Text(label, style: const TextStyle(fontSize: 16, fontFamily: 'Inter')),
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF444444)),
+              style: const TextStyle(fontSize: 16,fontFamily: 'Inter', color: Color(0xFF444444)),
             ),
             // const SizedBox(width: 4),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 5.0,
-              ),
+              padding: EdgeInsets.fromLTRB(8.0, 5.0, 0, 5.0),
+              // padding: const EdgeInsets.symmetric(
+              //   horizontal: 8.0,
+              //   vertical: 5.0,
+              // ),
               child: Image.asset(
                 'assets/icons/scheduling/booking/img.png',
                 width: 8,
@@ -1139,20 +1256,22 @@ class DateTimeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400, fontFamily: 'Inter'),
           ),
           const Spacer(),
           if (date != null)
             GestureDetector(
               onTap: onDateTap,
               child: PillText(
+                width: 130,
+                height: 36,
                 date!,
-                dateColor ?? Colors.black,
+                dateColor ?? Color.fromRGBO(39, 39, 39, 1),
                 isCalender: true,
               ),
             ),
@@ -1161,37 +1280,14 @@ class DateTimeRow extends StatelessWidget {
             GestureDetector(
               onTap: onTimeTap,
               child: PillText(
+                width: 95,
+                height: 36,
                 time!,
-                timeColor ?? Colors.black,
+                timeColor ?? Color.fromRGBO(39, 39, 39, 1),
                 isCalender: true,
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-class MonthYearPicker extends StatelessWidget {
-  final DateTime initialDate;
-  final ValueChanged<DateTime> onDateChanged;
-
-  const MonthYearPicker({
-    Key? key,
-    required this.initialDate,
-    required this.onDateChanged,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.monthYear,
-        initialDateTime: initialDate,
-        minimumDate: DateTime(DateTime.now().year - 100),
-        maximumDate: DateTime(2099, 12),
-        onDateTimeChanged: onDateChanged,
       ),
     );
   }

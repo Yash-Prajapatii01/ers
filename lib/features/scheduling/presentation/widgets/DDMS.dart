@@ -221,7 +221,6 @@ class DDMSSelectableList extends StatelessWidget {
   }
 }
 
-
 class CustomCheckbox extends StatefulWidget {
   final bool initialValue;
   final ValueChanged<bool> onChanged;
@@ -273,4 +272,3 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
     );
   }
 }
-

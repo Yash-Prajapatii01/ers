@@ -19,7 +19,7 @@ class BottomSheetService {
     bool startFullSize = true,
     BottomSheetSelectionCallback? onSelected,
   }) async {
-    final double initialSize = startFullSize ? 0.90 : 0.51;
+    final double initialSize = startFullSize ? 0.90 : 0.50;
 
     final selected = await showModalBottomSheet<dynamic>(
       context: context,
@@ -518,25 +518,53 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
       );
     } else {
       return Expanded(
-        child: ListView.builder(
-          itemCount: _filteredOptions.length,
-          itemBuilder: (_, index) {
-            final item = _filteredOptions[index];
-            return RadioListTile<String>(
-              title: Text(item),
-              value: item,
-              groupValue: _selectedOption,
-              onChanged: (val) {
-                setState(() {
-                  _selectedOption = val!;
-                });
-              },
-            );
-          },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ListView.separated(
+            separatorBuilder: (_, __) => const Divider(
+              height: 0.5,
+              thickness: 0.7,
+              color: Color.fromRGBO(0, 0, 0, 0.12),
+            ),
+            itemCount: _filteredOptions.length,
+            padding: EdgeInsets.zero,
+            itemBuilder: (ctx, i) {
+              final opt = _filteredOptions[i];
+              final sel = opt == _selectedOption;
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() => _selectedOption = opt);
+                    if (widget.isDonethere == false) Navigator.pop(context, opt);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            opt,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        if (sel) const Icon(Icons.check, color: Colors.black),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       );
     }
-
     // return Expanded( //here is the resource thing is worked on !!
     //   child: Padding(
     //     padding: const EdgeInsets.symmetric(horizontal: 16.0),

@@ -228,7 +228,6 @@ class _BookingFormState extends State<BookingForm> {
                   title: 'Requirements',
                   isSearchEnabled: true,
                   isDragHandleNeeded: true,
-
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   options: [
                     'ID 2 / Project b / 45 Hours',
