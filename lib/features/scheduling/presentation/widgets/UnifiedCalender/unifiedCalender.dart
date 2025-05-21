@@ -1,18 +1,17 @@
-
-import 'package:ers_linux/features/scheduling/presentation/widgets/CustomContent.dart';
+import 'package:ers_linux/features/scheduling/presentation/widgets/UnifiedCalender/widgets/PickerType.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-enum PickerType {
-  none,
-  fromDate,
-  toDate,
-  fromTime,
-  toTime,
-  singleDate,
-  singleTime,
-}
+import '../CustomCupertinoPicker.dart';
+import '../PillText.dart';
+import 'UI/DateTimeRow.dart';
+import 'UI/EndRepeatRow.dart';
+import 'UI/RepeatRow.dart';
+import 'widgets/CalenderGrid.dart';
+import 'widgets/CalenderHeader.dart';
+import 'widgets/MonthPicker.dart';
+import 'widgets/TimePicker.dart';
 
 class UnifiedCalendar extends StatefulWidget {
   final DateTime? initialDate;
@@ -105,18 +104,63 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
         activePicker = PickerType.none;
       } else {
         activePicker = type;
-      }
-      // Reset sub-picker whenever switching main picker
-      showMonthYearPicker = false;
+        // Mark as picked immediately upon opening the picker
+        switch (type) {
+          case PickerType.fromDate:
+            pickedFromDate = true;
+            break;
+          case PickerType.fromTime:
+            pickedFromTime = true;
+            break;
+          case PickerType.toDate:
+            pickedToDate = true;
+            break;
+          case PickerType.toTime:
+            pickedToTime = true;
+            break;
+          case PickerType.singleDate:
+            pickedFromDate = true;
+            break;
+          case PickerType.singleTime:
+            pickedFromTime = true;
+            break;
+          default:
+            break;
+        }
 
-      // Set displayed month based on active picker
-      if (type == PickerType.fromDate || type == PickerType.singleDate) {
-        displayedMonth = DateTime(fromDate.year, fromDate.month);
-      } else if (type == PickerType.toDate) {
-        displayedMonth = DateTime(toDate.year, toDate.month);
+        // Set displayed month
+        if (type == PickerType.fromDate || type == PickerType.singleDate) {
+          displayedMonth = DateTime(fromDate.year, fromDate.month);
+        } else if (type == PickerType.toDate) {
+          displayedMonth = DateTime(toDate.year, toDate.month);
+        }
+
+        // Hide month-year picker when switching pickers
+        showMonthYearPicker = false;
       }
     });
   }
+
+
+  // void _togglePicker(PickerType type) {
+  //   setState(() {
+  //     if (activePicker == type) {
+  //       activePicker = PickerType.none;
+  //
+  //     } else {
+  //       activePicker = type;
+  //     }
+  //     // Reset sub-picker whenever switching main picker
+  //     showMonthYearPicker = false;
+  //
+  //     // Set displayed month based on active picker
+  //     if (type == PickerType.fromDate || type == PickerType.singleDate) {
+  //       displayedMonth = DateTime(fromDate.year, fromDate.month);
+  //     } else if (type == PickerType.toDate) {
+  //       displayedMonth = DateTime(toDate.year, toDate.month);
+  //     }
+  //   });
+  // }
 
   List<int> _getOptionsBasedOnRepeat(String repeat) {
     switch (repeat) {
@@ -183,7 +227,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   Widget build(BuildContext context) {
     return Container(
       padding:
-          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.all(15.5),
+          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 15.5, vertical: 11.5),
       decoration:
           widget.isRangePicker && !widget.remmoveInternalPadding
               ? BoxDecoration(
@@ -379,7 +423,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                         });
                         print(isAfterSlider);
                       },
-                      child: PillText(afterRow, Colors.black ,radius: 8, isCalender: false,),
+                      child: PillText(width:38,height: 36, afterRow, Color.fromRGBO(39, 39, 39, 1) ,radius: 8, isCalender: false,),
                     ),
                   ],
                 ),
@@ -428,11 +472,18 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                       onTap: () {
                         setState(() {
                           isActiveCalender = !isActiveCalender;
+                          if (isActiveCalender) {
+                            pickedOnDate = true;
+                          }
                         });
                       },
                       child: PillText(
+                        //todo we have to make the padding and sizing work good PillText have some fault here !!
+                        width: 128,
+                        // height: 48,
+                        radius: 8,
                         (DateFormat('d MMMM y').format(AfterDate).toString()),
-                        pickedOnDate? Colors.blue : Colors.black,
+                        (pickedOnDate || isActiveCalender) ? Colors.blue : Colors.black,
                         isCalender: true,
                       ),
                     ),
@@ -613,7 +664,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
         else
           // Calendar grid for day selection
           CalendarGrid(
-            weekdaylabel: widget.showWeekdayLabels,
+            showWeekdayLabels: widget.showWeekdayLabels,
             month: displayedMonth.month,
             year: displayedMonth.year,
             selected: isFrom ? fromDate : toDate,
@@ -649,121 +700,6 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   int min(int a, int b) => a < b ? a : b;
 }
 
-class PillText extends StatelessWidget {
-  final String text;
-  final Color color;
-  final double? width;
-  final double? height;
-  final double radius;
-  final bool isCalender;
-
-
-  const PillText(
-    this.text,
-    this.color, {
-    Key? key,
-    this.isCalender = false,
-    this.width,
-    this.height,
-    this.radius = 4,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      //todo: isCalender work on color
-      width: width,
-      height: height,
-      // alignment: Alignment.center,
-      // padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          padding : isCalender
-              ? const EdgeInsets.symmetric(horizontal: 14, vertical: 8)
-              : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isCalender ? Color(0xFFF4F4F4) : Colors.grey.shade100,
-        borderRadius:
-            isCalender ? BorderRadius.circular(8) : BorderRadius.circular(radius),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: isCalender ? 16 : 14,
-          color: isCalender ? color : Color.fromRGBO(102, 112, 133, 0.5),
-        ),
-      ),
-    );
-  }
-}
-
-class CalendarHeader extends StatelessWidget {
-  final String monthYearText;
-  final bool showMonthYearPicker;
-  final VoidCallback onToggleMonthYearPicker;
-  final VoidCallback onPreviousMonth;
-  final VoidCallback onNextMonth;
-
-  const CalendarHeader({
-    Key? key,
-    required this.monthYearText,
-    required this.showMonthYearPicker,
-    required this.onToggleMonthYearPicker,
-    required this.onPreviousMonth,
-    required this.onNextMonth,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Month-year selector with dropdown
-        GestureDetector(
-          onTap: onToggleMonthYearPicker,
-          child: Row(
-            children: [
-              Text(
-                monthYearText,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(28, 121, 212, 1),
-                ),
-              ),
-              Icon(
-                showMonthYearPicker
-                    ? Icons.keyboard_arrow_down
-                    : Icons.keyboard_arrow_right,
-                color: Color.fromRGBO(28, 121, 212, 1),
-              ),
-            ],
-          ),
-        ),
-        Spacer(),
-        // Previous/next month buttons
-        // if(!showMonthYearPicker)
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(
-                Icons.chevron_left,
-                color: Color.fromRGBO(28, 121, 212, 1),
-              ),
-              onPressed: onPreviousMonth,
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.chevron_right,
-                color: Color.fromRGBO(28, 121, 212, 1),
-              ),
-              onPressed: onNextMonth,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
 /*
 It is For the syncing the < & > with the time Picker
 class MonthYearPicker extends StatefulWidget {
@@ -818,510 +754,7 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
 }
  */
 
-class MonthYearPicker extends StatelessWidget {
-  final DateTime initialDate;
-  final ValueChanged<DateTime> onDateChanged;
 
-  const MonthYearPicker({
-    Key? key,
-    required this.initialDate,
-    required this.onDateChanged,
-  }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.monthYear,
-        initialDateTime: initialDate,
-        minimumDate: DateTime(DateTime.now().year - 100),
-        maximumDate: DateTime(2099, 12),
-        onDateTimeChanged: onDateChanged,
-      ),
-    );
-  }
-}
 
-class EndRepeatRow extends StatelessWidget {
-  final List<String> options;
-  final String label, value;
-  final String selectedValue;
-  final ValueChanged<String> onSelected;
 
-  const EndRepeatRow({
-    super.key,
-    required this.options,
-    required this.label,
-    required this.value,
-    required this.selectedValue,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        final Offset offset = box.localToGlobal(Offset.zero);
-        final Size size = box.size;
-        final RenderBox overlay =
-            Overlay.of(context).context.findRenderObject() as RenderBox;
-
-        // Popup menu positioned above the widget
-        final RelativeRect pos = RelativeRect.fromLTRB(
-          offset.dx + size.width - 200,
-          offset.dy - (51.2 * options.length) - 10.5,
-          overlay.size.width - offset.dx - size.width - 16.5,
-          offset.dy,
-        );
-
-        final items = <PopupMenuEntry<String>>[];
-
-        for (var i = 0; i < options.length; i++) {
-          items.add(
-            PopupMenuItem<String>(
-              // padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-              height: 48, // Based on 10 vertical padding + font height
-              value: options[i],
-              child: SizedBox(
-                width: 170,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // const SizedBox(width: 8), // Left margin before icon
-                    if (options[i] == selectedValue)
-                      const Icon(Icons.check, size: 16, color: Colors.black)
-                    else
-                      const SizedBox(width: 16),
-                    // Placeholder to align text
-                    const SizedBox(width: 4),
-                    // Right margin after icon
-                    // const SizedBox(width: 0), // Optional: spacing fine-tuning
-                    Expanded(
-                      child: Text(
-                        options[i],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                          color: Color.fromRGBO(39, 39, 39, 1),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-          if (i < options.length - 1) {
-            items.add(
-              PopupMenuItem<String>(
-                enabled: false, // Prevent selection
-                height: 0.7,
-                padding: EdgeInsets.zero,
-                child: Container(
-                  height: 0.7,
-                  color: const Color.fromRGBO(102, 112, 133, 0.2),
-                ),
-              ),
-            );
-          }
-        }
-
-        final choice = await showMenu<String>(
-          context: context,
-          position: pos,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
-          ),
-          elevation: 4,
-          items: items,
-        );
-        if (choice != null) onSelected(choice);
-      },
-      child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Text(label, style: const TextStyle(fontSize: 16, fontFamily: 'Inter')),
-            const Spacer(),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF444444), fontFamily: 'Inter'),
-            ),
-            // const SizedBox(width: 4),
-            Padding(
-              padding: EdgeInsets.fromLTRB(8.0, 5.0, 0, 5.0),
-              child: Image.asset(
-                'assets/icons/scheduling/booking/img.png',
-                width: 8,
-                height: 20,
-              ),
-              // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
-            ),
-            // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
-          ],
-        ),
-      ),
-    );
-  }
-}
-class CalendarGrid extends StatelessWidget {
-  final int month, year;
-  final DateTime selected;
-  final ValueChanged<int> onDaySelected;
-  final bool weekdaylabel;
-
-  const CalendarGrid({
-    Key? key,
-    required this.month,
-    required this.year,
-    required this.selected,
-    required this.onDaySelected,
-    this.weekdaylabel = true,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final daysInMonth = DateTime(year, month + 1, 0).day;
-    final firstWeekday = DateTime(year, month, 1).weekday % 7;
-
-    // Days of week labels
-    final List<String> daysOfWeek = [
-      'Sun',
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-    ];
-    return Column(
-      children: [
-        // Days of week header row
-        if (weekdaylabel) ...[
-          Row(
-            children:
-                daysOfWeek
-                    .map(
-                      (day) => Expanded(
-                        child: Center(
-                          child: Text(
-                            day,
-                            style: const TextStyle(
-                              color: Color.fromRGBO(60, 60, 67, 0.3),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //   children:
-          //       daysOfWeek
-          //           .map(
-          //             (day) => Expanded(
-          //               child: Center(
-          //                 child: Text(
-          //                   day,
-          //                   style: const TextStyle(
-          //                     color: Color.fromRGBO(60, 60, 67, 0.3),
-          //                     fontWeight: FontWeight.w600,
-          //                     fontSize: 13,
-          //                   ),
-          //                 ),
-          //               ),
-          //             ),
-          //           )
-          //           .toList(),
-          // ),
-          // const SizedBox(height: 8),
-        ],
-        // Calendar grid
-        GridView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7,
-            childAspectRatio: 1,
-          ),
-          itemCount: firstWeekday + daysInMonth,
-          itemBuilder: (context, index) {
-            if (index < firstWeekday) return const SizedBox.shrink();
-            final day = index - firstWeekday + 1;
-            final isSel =
-                selected.year == year &&
-                selected.month == month &&
-                selected.day == day;
-
-            final columnIndex = index % 7;
-            final margin = EdgeInsets.only(
-              top: 2,
-              bottom: 2,
-              left: columnIndex == 0 ? 0 : 2,
-              right: columnIndex == 6 ? 0 : 2,
-            );
-
-            return GestureDetector(
-              onTap: () => onDaySelected(day),
-              child: Container(
-                width: 32,
-                height: 32,
-                margin: margin,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSel ? Color.fromRGBO(28, 121, 212, 1) : null,
-                ),
-                child: Center(
-                  child: Text(
-                    '$day',
-                    style: TextStyle(
-                      color: isSel ? Colors.white : Colors.black,
-                      // fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class RepeatRow extends StatelessWidget {
-  final String label, value;
-  final List<String> options;
-  final String selectedValue;
-  final ValueChanged<String> onSelected;
-
-  const RepeatRow({
-    Key? key,
-    required this.label,
-    required this.value,
-    required this.options,
-    required this.selectedValue,
-    required this.onSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        final Offset offset = box.localToGlobal(Offset.zero);
-        final Size size = box.size;
-        final RenderBox overlay =
-            Overlay.of(context).context.findRenderObject() as RenderBox;
-
-        // Popup menu positioned above the widget
-        final RelativeRect pos = RelativeRect.fromLTRB(
-          offset.dx + size.width - 200,
-          offset.dy - (51.2 * options.length) - 10.5,
-          overlay.size.width - offset.dx - size.width - 16.5,
-          offset.dy,
-        );
-
-        final items = <PopupMenuEntry<String>>[];
-
-        for (var i = 0; i < options.length; i++) {
-          items.add(
-            PopupMenuItem<String>(
-              // padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-              height: 48, // Based on 10 vertical padding + font height
-              value: options[i],
-              child: SizedBox(
-                width: 170,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // const SizedBox(width: 8), // Left margin before icon
-                    if (options[i] == selectedValue)
-                      const Icon(Icons.check, size: 16, color: Colors.black)
-                    else
-                      const SizedBox(width: 16),
-                    // Placeholder to align text
-                    const SizedBox(width: 4),
-                    // Right margin after icon
-                    // const SizedBox(width: 0), // Optional: spacing fine-tuning
-                    Expanded(
-                      child: Text(
-                        options[i],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                          color: Color.fromRGBO(39, 39, 39, 1),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-          if (i < options.length - 1) {
-            items.add(
-              PopupMenuItem<String>(
-                enabled: false, // Prevent selection
-                height: 0.7,
-                padding: EdgeInsets.zero,
-                child: Container(
-                  height: 0.7,
-                  color: const Color.fromRGBO(102, 112, 133, 0.2),
-                ),
-              ),
-            );
-          }
-        }
-
-        final choice = await showMenu<String>(
-          context: context,
-          position: pos,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
-          ),
-          elevation: 4,
-          items: items,
-        );
-        if (choice != null) onSelected(choice);
-      },
-      child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Text(label, style: const TextStyle(fontSize: 16, fontFamily: 'Inter')),
-            const Spacer(),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 16,fontFamily: 'Inter', color: Color(0xFF444444)),
-            ),
-            // const SizedBox(width: 4),
-            Padding(
-              padding: EdgeInsets.fromLTRB(8.0, 5.0, 0, 5.0),
-              // padding: const EdgeInsets.symmetric(
-              //   horizontal: 8.0,
-              //   vertical: 5.0,
-              // ),
-              child: Image.asset(
-                'assets/icons/scheduling/booking/img.png',
-                width: 8,
-                height: 20,
-              ),
-              // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
-            ),
-            // const Icon(CupertinoIcons.chevron_up_chevron_down, size: 20 , color: Color.fromRGBO(102, 112, 133, 0.5),),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DateTimeRow extends StatelessWidget {
-  final String label;
-  final String? date;
-  final String? time;
-  final Color? dateColor;
-  final Color? timeColor;
-  final VoidCallback? onDateTap;
-  final VoidCallback? onTimeTap;
-
-  const DateTimeRow({
-    Key? key,
-    required this.label,
-    this.date,
-    this.time,
-    this.dateColor,
-    this.timeColor,
-    this.onDateTap,
-    this.onTimeTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400, fontFamily: 'Inter'),
-          ),
-          const Spacer(),
-          if (date != null)
-            GestureDetector(
-              onTap: onDateTap,
-              child: PillText(
-                width: 130,
-                height: 36,
-                date!,
-                dateColor ?? Color.fromRGBO(39, 39, 39, 1),
-                isCalender: true,
-              ),
-            ),
-          if (date != null && time != null) const SizedBox(width: 8),
-          if (time != null)
-            GestureDetector(
-              onTap: onTimeTap,
-              child: PillText(
-                width: 95,
-                height: 36,
-                time!,
-                timeColor ?? Color.fromRGBO(39, 39, 39, 1),
-                isCalender: true,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// DateTime(DateTime.now().year + 100, 12),
-class TimePicker extends StatelessWidget {
-  final TimeOfDay initialTime;
-  final ValueChanged<TimeOfDay> onTimeChanged;
-
-  const TimePicker({
-    Key? key,
-    required this.initialTime,
-    required this.onTimeChanged,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SizedBox(
-        height: 150,
-        child: CupertinoDatePicker(
-          mode: CupertinoDatePickerMode.time,
-          initialDateTime: DateTime(
-            0,
-            0,
-            0,
-            initialTime.hour,
-            initialTime.minute,
-          ),
-          onDateTimeChanged:
-              (val) => onTimeChanged(TimeOfDay.fromDateTime(val)),
-        ),
-      ),
-    );
-  }
-}

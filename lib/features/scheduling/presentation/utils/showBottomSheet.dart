@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
-import '../../data/models/resource.dart';
-import '../widgets/ColorPicker.dart';
+import '../../data/models/resource_model.dart';
+import '../widgets/ColorPicker/ColorPicker.dart';
 import '../widgets/CustomTextField.dart';
 import '../widgets/DDMS.dart';
+import '../widgets/UnifiedCalender/unifiedCalender.dart';
 import '../widgets/priorityWheel.dart';
-import '../widgets/unifiedCalender.dart';
 
 typedef BottomSheetSelectionCallback = void Function(dynamic selected);
 
@@ -155,9 +156,10 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
               .where((o) => o.toLowerCase().contains(q))
               .toList();
 
-      _filteredResources = (widget.resourceOptions ?? [])
-          .where((r) => r.name.toLowerCase().contains(q))
-          .toList();
+      _filteredResources =
+          (widget.resourceOptions ?? [])
+              .where((r) => r.name.toLowerCase().contains(q))
+              .toList();
     });
   }
 
@@ -217,7 +219,12 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ListView.separated(
         itemCount: _filteredResources.length,
-        separatorBuilder: (_, __) => const Divider(height: 0.5,thickness: 0.7, color: Color.fromRGBO(0, 0, 0, 0.12),),
+        separatorBuilder:
+            (_, __) => const Divider(
+              height: 0.5,
+              thickness: 0.7,
+              color: Color.fromRGBO(0, 0, 0, 0.12),
+            ),
         itemBuilder: (ctx, i) {
           final resource = _filteredResources[i];
           return Material(
@@ -227,10 +234,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
                 Navigator.pop(context, resource);
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 0,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                 child: Row(
                   children: [
                     CircleAvatar(
@@ -268,8 +272,6 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -382,7 +384,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
             color: Color.fromRGBO(102, 112, 133, 0.5),
           ),
           prefixIcon: Padding(
-            padding: const EdgeInsets.only(left: 12, right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -396,20 +398,90 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
             minWidth: 0,
             minHeight: 0,
           ),
+          suffixIcon:
+              _searchController.text.isNotEmpty
+                  ? GestureDetector(
+                    onTap:
+                        () => setState(() {
+                          _searchController.clear();
+                        }),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/scheduling/booking/close.svg',
+                        width: 16,
+                        height: 16,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  )
+                  : null,
           filled: true,
+          fillColor: const Color.fromRGBO(245, 246, 248, 1),
           contentPadding: const EdgeInsets.symmetric(
             vertical: 9.5,
             horizontal: 9.5,
           ),
-          fillColor: const Color.fromRGBO(245, 246, 248, 1),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,
           ),
         ),
+        onChanged: (_) => setState(() {}), // Triggers suffixIcon rebuild
       ),
     ),
   );
+
+  // Widget _buildSearchField() => Padding(
+  //   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+  //   child: SizedBox(
+  //     width: double.infinity,
+  //     height: 40,
+  //     child: TextField(
+  //       controller: _searchController,
+  //       style: const TextStyle(
+  //         fontSize: 14,
+  //         fontWeight: FontWeight.w400,
+  //         color: Colors.black,
+  //       ),
+  //       decoration: InputDecoration(
+  //         hintText: widget.SearchHintText,
+  //         hintStyle: const TextStyle(
+  //           fontSize: 14,
+  //           fontWeight: FontWeight.w400,
+  //           color: Color.fromRGBO(102, 112, 133, 0.5),
+  //         ),
+  //         prefixIcon: Padding(
+  //           padding: const EdgeInsets.only(left: 12, right: 12),
+  //           child: Row(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               const Icon(CupertinoIcons.search, color: Colors.grey),
+  //               const SizedBox(width: 12),
+  //               Container(width: 1, height: 25, color: const Color(0xFFE0E0E0)),
+  //               // Spacer(),
+  //               // SvgPicture.asset('assets/icons/scheduling/booking/close.svg')
+  //             ],
+  //           ),
+  //         ),
+  //         prefixIconConstraints: const BoxConstraints(
+  //           minWidth: 0,
+  //           minHeight: 0,
+  //         ),
+  //         filled: true,
+  //         contentPadding: const EdgeInsets.symmetric(
+  //           vertical: 9.5,
+  //           horizontal: 9.5,
+  //         ),
+  //         fillColor: const Color.fromRGBO(245, 246, 248, 1),
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(10),
+  //           borderSide: BorderSide.none,
+  //         ),
+  //       ),
+  //     ),
+  //   ),
+  // );
 
   Widget _buildContent() {
     if (widget.unifiedcontainercontent != null) {
@@ -512,20 +584,20 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
       );
     }
     // Default single-selection options (String or Resource)
-    if ((widget.resourceOptions != null && widget.resourceOptions!.isNotEmpty)) {
-      return Expanded(
-        child: _buildResourceOptionsList(),
-      );
+    if ((widget.resourceOptions != null &&
+        widget.resourceOptions!.isNotEmpty)) {
+      return Expanded(child: _buildResourceOptionsList());
     } else {
       return Expanded(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: ListView.separated(
-            separatorBuilder: (_, __) => const Divider(
-              height: 0.5,
-              thickness: 0.7,
-              color: Color.fromRGBO(0, 0, 0, 0.12),
-            ),
+            separatorBuilder:
+                (_, __) => const Divider(
+                  height: 0.5,
+                  thickness: 0.7,
+                  color: Color.fromRGBO(0, 0, 0, 0.12),
+                ),
             itemCount: _filteredOptions.length,
             padding: EdgeInsets.zero,
             itemBuilder: (ctx, i) {
@@ -536,7 +608,8 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
                 child: InkWell(
                   onTap: () {
                     setState(() => _selectedOption = opt);
-                    if (widget.isDonethere == false) Navigator.pop(context, opt);
+                    if (widget.isDonethere == false)
+                      Navigator.pop(context, opt);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

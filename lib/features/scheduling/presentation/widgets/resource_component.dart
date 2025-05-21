@@ -1,15 +1,15 @@
 import 'package:ers_linux/features/scheduling/presentation/utils/showBottomSheet.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/unifiedContainerTile.dart';
+import 'package:ers_linux/features/scheduling/presentation/widgets/UnifiedContainerTile/unifiedContainerTile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../../shared/constants/text_sizes.dart';
-import '../../data/models/resource.dart';
+import '../../data/models/resource_model.dart';
+import 'UnifiedContainerTile/tile_interaction_type.dart';
 
 class ResourceSelector extends StatefulWidget {
-  final List<String> avatarUrls;
 
-  const ResourceSelector({super.key, required this.avatarUrls});
+  const ResourceSelector({super.key});
 
   @override
   State<ResourceSelector> createState() => _ResourceSelectorState();
@@ -43,7 +43,7 @@ class _ResourceSelectorState extends State<ResourceSelector> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
+      padding: const EdgeInsets.all(15.5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -98,27 +98,15 @@ class _ResourceSelectorState extends State<ResourceSelector> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Container(
-                width: 1,
-                height: 21,
-                color: const Color.fromRGBO(82, 82, 82, 0.6),
-              ),
-              const SizedBox(width: 8),
-              if (selectedAvatarUrl == null)
-                ...widget.avatarUrls.map(
-                  (url) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: GestureDetector(
-                      onTap: () => _onAvatarTap(url),
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(url),
-                      ),
-                    ),
-                  ),
-                )
-              else
+
+              if (selectedAvatarUrl != null) ...[
+                const SizedBox(width: 12),
+                Container(
+                  width: 1,
+                  height: 21,
+                  color: const Color.fromRGBO(82, 82, 82, 0.6),
+                ),
+                const SizedBox(width: 8),
                 Row(
                   children: [
                     CircleAvatar(
@@ -139,18 +127,19 @@ class _ResourceSelectorState extends State<ResourceSelector> {
                         Text(
                           selectedRole ?? '',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Color.fromRGBO(165, 165, 165, 1),
-                            fontWeight: FontWeight.w400
+                              fontSize: 12,
+                              color: Color.fromRGBO(165, 165, 165, 1),
+                              fontWeight: FontWeight.w400
                           ),
                         ),
                       ],
                     ),
                   ],
                 ),
+              ]
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16 ),
 
           // Project tile
           UnifiedContainerTile(
@@ -165,7 +154,7 @@ class _ResourceSelectorState extends State<ResourceSelector> {
               options: ['FocusFlow', 'FitLoop', 'LearnMate', 'StreakSync'],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           // Task tile
           UnifiedContainerTile(

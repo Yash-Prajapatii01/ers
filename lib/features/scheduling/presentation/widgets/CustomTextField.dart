@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 
 class CustomTextField extends StatefulWidget {
   final String hintText;
@@ -71,32 +71,40 @@ class _CustomTextFieldState extends State<CustomTextField> {
         maxLines: widget.maxLines,
         minLines: widget.minLines,
         decoration:
-        (widget.decoration ??
-            InputDecoration(
-              hintText: widget.hintText,
-              hintStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-              ),
-              suffixIcon:
-              _controller.text.isNotEmpty
-                  ? IconButton(
-                icon: Icon(CupertinoIcons.xmark_circle),
-                onPressed: () {
-                  _controller.clear();
-                  setState(() {});
-                  widget.onChanged?.call('');
-                },
-              )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 11.5,
-              ),
-            )),
+            (widget.decoration ??
+                InputDecoration(
+                  hintText: widget.hintText,
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  suffixIcon:
+                      _controller.text.isNotEmpty
+                          ? GestureDetector(
+                            onTap:
+                                () => setState(() {
+                                  _controller.clear();
+                                  widget.onChanged?.call('');
+                                }),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/scheduling/booking/close.svg',
+                                width: 16,
+                                height: 16,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          )
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11.5,
+                  ),
+                )),
         onChanged: (value) {
           setState(() {});
           widget.onChanged?.call(value);

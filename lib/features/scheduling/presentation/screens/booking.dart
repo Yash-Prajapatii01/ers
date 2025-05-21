@@ -1,13 +1,14 @@
 import 'package:ers_linux/features/scheduling/presentation/screens/NotesPageScreen.dart';
-import 'package:ers_linux/features/scheduling/presentation/widgets/CustomContent.dart';
+import 'package:ers_linux/features/scheduling/presentation/widgets/CustomContent/CustomContent.dart';
 import 'package:ers_linux/shared/constants/text_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/showBottomSheet.dart';
 import '../widgets/CustomTextField.dart';
+import '../widgets/UnifiedCalender/unifiedCalender.dart';
+import '../widgets/UnifiedContainerTile/tile_interaction_type.dart';
 import '../widgets/resource_component.dart';
-import '../widgets/unifiedCalender.dart';
-import '../widgets/unifiedContainerTile.dart';
+import '../widgets/UnifiedContainerTile/unifiedContainerTile.dart';
 
 class BookingForm extends StatefulWidget {
   static const routePath = '/booking_form';
@@ -145,7 +146,6 @@ class _BookingFormState extends State<BookingForm> {
           ),
         ),
       ),
-
       /*
       AppBar(
         backgroundColor: Color.fromRGBO(245, 250, 255, 1),
@@ -202,7 +202,7 @@ class _BookingFormState extends State<BookingForm> {
        */
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
               Row(
@@ -228,7 +228,6 @@ class _BookingFormState extends State<BookingForm> {
                   title: 'Requirements',
                   isSearchEnabled: true,
                   isDragHandleNeeded: true,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   options: [
                     'ID 2 / Project b / 45 Hours',
                     'ID 3 / Project A / 30 Hours',
@@ -238,14 +237,7 @@ class _BookingFormState extends State<BookingForm> {
                 ),
               ),
               SizedBox(height: 24),
-              ResourceSelector(
-                avatarUrls: [
-                  'https://xsgames.co/randomusers/assets/avatars/male/25.jpg',
-                  'https://xsgames.co/randomusers/assets/avatars/male/5.jpg',
-                  'https://xsgames.co/randomusers/assets/avatars/male/10.jpg',
-                  'https://xsgames.co/randomusers/assets/avatars/male/8.jpg',
-                ],
-              ),
+              ResourceSelector(),
               SizedBox(height: 24),
               UnifiedCalendar(
                 initialDate: DateTime.now(),
@@ -266,10 +258,8 @@ class _BookingFormState extends State<BookingForm> {
                       context: context,
                       child: BottomSheetOptions(
                         title: 'Custom',
-                        unifiedcontainercontent : Column(
-                          children: [
-                            FrequencyUnitSelector()
-                          ],
+                        unifiedcontainercontent: Column(
+                          children: [CustomTab()],
                         ),
                       ),
                     );
@@ -482,21 +472,21 @@ class _BookingFormState extends State<BookingForm> {
                 iconPath: 'assets/icons/scheduling/booking/efforts.svg',
                 interactionType: TileInteractionType.popupMenu,
                 isPinTextNeeded: true,
-                options: ['% Capacity', 'Hours', 'FTE'],
+                popMenuOptions: ['% Capacity', 'Hours', 'FTE'],
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Confirmed',
                 iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
                 interactionType: TileInteractionType.popupMenu,
-                options: ['Yes', 'No'],
+                popMenuOptions: ['Yes', 'No'],
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(
                 title: 'Travel Required',
                 iconPath: 'assets/icons/scheduling/booking/confirmed.svg',
                 interactionType: TileInteractionType.popupMenu,
-                options: ['Yes', 'No'],
+                popMenuOptions: ['Yes', 'No'],
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(
@@ -528,7 +518,7 @@ class _BookingFormState extends State<BookingForm> {
                 title: 'Billing Status',
                 iconPath: 'assets/icons/scheduling/booking/projects.svg',
                 interactionType: TileInteractionType.popupMenu,
-                options: ['Inherit from Project', 'Billable', 'Non Billable'],
+                popMenuOptions: ['Inherit from Project', 'Billable', 'Non Billable'],
               ),
               SizedBox(height: 24),
               UnifiedContainerTile(

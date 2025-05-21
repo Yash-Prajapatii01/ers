@@ -86,58 +86,112 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 250, 255, 1),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.chevron_left),
-        ),
-        title: Text(
-          'Notes',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: Color.fromRGBO(78, 78, 78, 1),
-          ),
-        ),
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromRGBO(16, 24, 40, 0.05),
-                    offset: const Offset(0, 1),
-                    blurRadius: 2,
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(12),
+        leadingWidth: MediaQuery.of(context).size.width,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5, bottom: 17.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        alignment: Alignment.centerLeft,
+                        child: Icon(
+                            Icons.chevron_left_rounded,
+                            size: 30
+                        ),
+                        // Replace Icon with your SVG later:
+                        // child: SvgPicture.asset('assets/icons/chevron_left.svg'),
+                      ),
+                    ),
+                    SizedBox(width: 4), // Adjust for visual spacing with text
+                    Text(
+                      'Notes',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Color.fromRGBO(39, 39, 39, 1),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+                // child: Row(
+                //   mainAxisAlignment: MainAxisAlignment.start,
+                //   children: [
+                //     //todo : to use the SVG icon rather than this
+                //     InkWell(
+                //       onTap : () => Navigator.pop(context),
+                //       child: Container(
+                //         alignment: Alignment.center,
+                //         width: 18,
+                //         height: 10,
+                //         child: Icon(Icons.chevron_left_rounded),
+                //       ),
+                //     ),
+                //     SizedBox(width: 10),
+                //     Text(
+                //       'Booking',
+                //       style: TextStyle(
+                //         fontSize: 18,
+                //         fontWeight: FontWeight.w500,
+                //         color: Color.fromRGBO(39, 39, 39, 1),
+                //       ),
+                //       overflow: TextOverflow.ellipsis,
+                //     ),
+                //   ],
+                // ),
               ),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(28, 121, 212, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Rounded corners
+              Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0, bottom: 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromRGBO(16, 24, 40, 0.05),
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 14.w,
-                    vertical: 8.h,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(28, 121, 212, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          8,
+                        ), // Rounded corners
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                    ),
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        // fontFamily: 'Inter'
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  'Save',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: TextSizes().bodyMedium,
-                    fontWeight: FontWeight.w600,
-                    // fontFamily: 'Inter'
-                  ),
-                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
       body: Center(
         child: Column(

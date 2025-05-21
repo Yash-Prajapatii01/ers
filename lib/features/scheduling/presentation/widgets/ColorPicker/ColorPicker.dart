@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'CircleThumb.dart';
+import 'SaturationBrightnessPainter.dart';
+
 class ColorPickerGrid extends StatefulWidget {
   final Function(Color) onColorSelected;
 
@@ -161,7 +164,7 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
             onTapDown: (details) => _handleSaturationBrightnessGesture(details.localPosition),
             child: CustomPaint(
               size: const Size(500, 160),
-              painter: _SaturationBrightnessPainter(
+              painter: SaturationBrightnessPainter(
                 hue: _currentHsv.hue,
                 saturation: _currentHsv.saturation,
                 value: _currentHsv.value,
@@ -220,7 +223,7 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 trackHeight: 24,
-                thumbShape: _CircleThumbShape(
+                thumbShape: CircleThumbShape(
                   thumbRadius: 8,
                   color: _currentHsv.toColor(),
                 ),
@@ -248,113 +251,4 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
   }
 
   Color get currentColor => _currentHsv.toColor().withOpacity(_alpha);
-}
-
-class _SaturationBrightnessPainter extends CustomPainter {
-  final double hue;
-  final double saturation;
-  final double value;
-
-  const _SaturationBrightnessPainter({
-    required this.hue,
-    required this.saturation,
-    required this.value,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-
-
-    final paintSatGrad =
-    Paint()
-      ..shader = LinearGradient(
-        colors: [
-          Colors.white,
-          HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor(),
-        ],
-      ).createShader(rect);
-
-    // Transparent to black (value/brightness)
-    final paintValGrad =
-    Paint()
-      ..shader = const LinearGradient(
-        colors: [Colors.transparent, Colors.black],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(rect);
-
-    // Paint the gradients
-    canvas.drawRect(rect, paintSatGrad);
-    canvas.drawRect(rect, paintValGrad);
-
-    // Draw the pointer position
-    final pointerX = saturation * size.width;
-    final pointerY = (1 - value) * size.height;
-
-    // Draw outer white circle
-    final outerPaint =
-    Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    canvas.drawCircle(Offset(pointerX, pointerY), 8, outerPaint);
-
-    // Draw inner circle with current color
-    final innerPaint =
-    Paint()
-      ..color = HSVColor.fromAHSV(1.0, hue, saturation, value).toColor();
-    canvas.drawCircle(Offset(pointerX, pointerY), 6, innerPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SaturationBrightnessPainter oldDelegate) {
-    return oldDelegate.hue != hue ||
-        oldDelegate.saturation != saturation ||
-        oldDelegate.value != value;
-  }
-}
-
-class _CircleThumbShape extends SliderComponentShape {
-  final double thumbRadius;
-  final Color color;
-
-  const _CircleThumbShape({required this.thumbRadius, required this.color});
-
-  @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(thumbRadius);
-  }
-
-  @override
-  void paint(
-      PaintingContext context,
-      Offset center, {
-        required Animation<double> activationAnimation,
-        required Animation<double> enableAnimation,
-        required bool isDiscrete,
-        required TextPainter labelPainter,
-        required RenderBox parentBox,
-        required SliderThemeData sliderTheme,
-        required TextDirection textDirection,
-        required double value,
-        required double textScaleFactor,
-        required Size sizeWithOverflow,
-      }) {
-    final Canvas canvas = context.canvas;
-
-    // Draw outer white circle
-    final Paint outerPaint =
-    Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, thumbRadius, outerPaint);
-
-    // Draw inner colored circle
-    final Paint innerPaint =
-    Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, thumbRadius * 0.6, innerPaint);
-  }
 }

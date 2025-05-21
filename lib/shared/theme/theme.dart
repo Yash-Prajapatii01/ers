@@ -6,44 +6,44 @@ ThemeData getAppTheme(BuildContext context) {
   final textSizes = TextSizes();
 
   return ThemeData(
-    fontFamily: 'Poppins',
+    fontFamily: 'Inter',
     textTheme: TextTheme(
       headlineLarge: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.headingLarge,
         fontWeight: FontWeight.bold,
       ),
       headlineMedium: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.headingMedium,
         fontWeight: FontWeight.w600,
       ),
       headlineSmall: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.headingSmall,
         fontWeight: FontWeight.w500,
       ),
       bodyLarge: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.bodyLarge,
       ),
       bodyMedium: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.bodyMedium,
       ),
       bodySmall: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.bodySmall,
       ),
       labelLarge: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.labelLarge,
       ),
       labelMedium: TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Inter',
         fontSize: textSizes.labelMedium,
       ),
-      labelSmall: TextStyle(fontFamily: 'Poppins', fontSize: textSizes.labelSmall),
+      labelSmall: TextStyle(fontFamily: 'Inter', fontSize: textSizes.labelSmall),
     ),
     primarySwatch: Colors.blue,
   );
