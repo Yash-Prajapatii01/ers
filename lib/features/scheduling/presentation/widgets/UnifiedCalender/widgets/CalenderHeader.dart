@@ -1,4 +1,6 @@
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CalendarHeader extends StatelessWidget {
   final String monthYearText;
@@ -28,17 +30,17 @@ class CalendarHeader extends StatelessWidget {
             children: [
               Text(
                 monthYearText,
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(28, 121, 212, 1),
+                  color: AppColors.primaryColor,
                 ),
               ),
               Icon(
                 showMonthYearPicker
-                    ? Icons.keyboard_arrow_down
-                    : Icons.keyboard_arrow_right,
-                color: Color.fromRGBO(28, 121, 212, 1),
+                    ? Icons.keyboard_arrow_down_rounded
+                    : Icons.keyboard_arrow_right_rounded,
+                color: AppColors.primaryColor,
               ),
             ],
           ),
@@ -50,15 +52,15 @@ class CalendarHeader extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(
-                Icons.chevron_left,
-                color: Color.fromRGBO(28, 121, 212, 1),
+                Icons.chevron_left_rounded,
+                color: AppColors.primaryColor,
               ),
               onPressed: onPreviousMonth,
             ),
             IconButton(
               icon: const Icon(
-                Icons.chevron_right,
-                color: Color.fromRGBO(28, 121, 212, 1),
+                Icons.chevron_right_rounded,
+                color: AppColors.primaryColor,
               ),
               onPressed: onNextMonth,
             ),

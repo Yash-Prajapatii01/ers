@@ -1,4 +1,6 @@
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomCupertinoPicker extends StatefulWidget {
   /// Options for the first column (can be any type)
@@ -75,10 +77,10 @@ class _CustomCupertinoPickerState extends State<CustomCupertinoPicker> {
             height: _pickerHeight,
             alignment: Alignment.center,
             child: Container(
-              height: _itemExtent,
+              height: _itemExtent.h,
               decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(6),
+                color: AppColors.pickerOverlayColor,
+                borderRadius: BorderRadius.circular(6.r),
               ),
             ),
           ),
@@ -98,7 +100,7 @@ class _CustomCupertinoPickerState extends State<CustomCupertinoPicker> {
             setState(() => _selectedDayIndex = index);
             _emitDualSelection();
           },
-          width: 50,
+          width: 60.w,
         ),
         _buildCompactPicker(
           items: widget.secondColumnOptions!,
@@ -107,7 +109,7 @@ class _CustomCupertinoPickerState extends State<CustomCupertinoPicker> {
             setState(() => _selectedWeekdayIndex = index);
             _emitDualSelection();
           },
-          width: 110,
+          width: 110.w,
         ),
       ],
     );
@@ -115,7 +117,7 @@ class _CustomCupertinoPickerState extends State<CustomCupertinoPicker> {
 
   Widget _buildSingleColumnPicker() {
     return SizedBox(
-      width: 200,
+      width: 200.w,
       height: _pickerHeight,
       child: _buildCompactPicker(
         items: widget.singleColumnOptions!.map((e) => e.toString()).toList(),
@@ -124,7 +126,7 @@ class _CustomCupertinoPickerState extends State<CustomCupertinoPicker> {
           setState(() => _selectedSingleIndex = index);
           _emitSingleSelection();
         },
-        width: 200,
+        width: 200.w,
       ),
     );
   }
@@ -151,10 +153,10 @@ class _CustomCupertinoPickerState extends State<CustomCupertinoPicker> {
           return Center(
             child: Text(
               items[index],
-              style: const TextStyle(
-                fontSize: 18,
+              style:  TextStyle(
+                fontSize: 18.sp,
                 fontFamily: 'Inter',
-                color: CupertinoColors.label,
+                color: AppColors.darkBlack,
               ),
             ),
           );

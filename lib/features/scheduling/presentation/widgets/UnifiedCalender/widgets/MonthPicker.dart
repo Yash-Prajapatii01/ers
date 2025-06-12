@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class MonthYearPicker extends StatelessWidget {
   final DateTime initialDate;
   final ValueChanged<DateTime> onDateChanged;
@@ -12,8 +13,8 @@ class MonthYearPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200,
-      child: CupertinoDatePicker(
+      height: 190.h,
+      child: CupertinoDatePicker( //todo here we have to work for the dialer radius and implement the custom if possible.
         mode: CupertinoDatePickerMode.monthYear,
         initialDateTime: initialDate,
         minimumDate: DateTime(DateTime.now().year - 100),
@@ -23,3 +24,68 @@ class MonthYearPicker extends StatelessWidget {
     );
   }
 }
+
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// import 'package:intl/intl.dart';
+//
+// import '../../CustomCupertinoPicker.dart';
+//
+// class MonthYearPickerWidget extends StatefulWidget {
+//   final DateTime initialDate;
+//   final ValueChanged<DateTime> onDateChanged;
+//
+//   const MonthYearPickerWidget({
+//     super.key,
+//     required this.initialDate,
+//     required this.onDateChanged,
+//   });
+//
+//   @override
+//   State<MonthYearPickerWidget> createState() => _MonthYearPickerWidgetState();
+// }
+//
+// class _MonthYearPickerWidgetState extends State<MonthYearPickerWidget> {
+//   late DateTime _selectedDate;
+//   DateTime minimumDate = DateTime(DateTime.now().year - 100);
+//   DateTime maximumDate =  DateTime(DateTime.now().year + 100);
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _selectedDate = widget.initialDate;
+//   }
+//
+//   List<String> get _monthOptions {
+//     return List.generate(12, (index) {
+//       return DateFormat.MMMM().format(DateTime(2000, index + 1));
+//     });
+//   }
+//
+//   List<int> get _yearOptions {
+//     final startYear = minimumDate.year;
+//     final endYear = maximumDate.year;
+//     return List.generate(endYear - startYear + 1, (index) => startYear + index);
+//   }
+//
+//   void _onSelectionChanged(dynamic month, String year) {
+//     // month will be the month name string, year will be the year string
+//     final monthIndex = _monthOptions.indexOf(month.toString()) + 1;
+//     final yearValue = int.parse(year);
+//
+//     final newDate = DateTime(yearValue, monthIndex);
+//     setState(() {
+//       _selectedDate = newDate;
+//     });
+//     widget.onDateChanged(newDate);
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return CustomCupertinoPicker(
+//       firstColumnOptions: _monthOptions,
+//       secondColumnOptions: _yearOptions.map((year) => year.toString()).toList(),
+//       onDualColumnSelected: _onSelectionChanged,
+//     );
+//   }
+// }

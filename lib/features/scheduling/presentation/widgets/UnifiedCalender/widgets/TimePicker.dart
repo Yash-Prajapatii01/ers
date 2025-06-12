@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class TimePicker extends StatelessWidget {
   final TimeOfDay initialTime;
   final ValueChanged<TimeOfDay> onTimeChanged;
@@ -14,7 +15,7 @@ class TimePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: SizedBox(
-        height: 150,
+        height: 150.h,
         child: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.time,
           initialDateTime: DateTime(

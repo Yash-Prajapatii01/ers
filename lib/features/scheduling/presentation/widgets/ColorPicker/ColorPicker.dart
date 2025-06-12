@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'CircleThumb.dart';
 import 'SaturationBrightnessPainter.dart';
@@ -63,7 +64,7 @@ class _ColorPickerGridState extends State<ColorPickerGrid> {
             changeColor(color);
           },
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         // Grid of preset colors
         Wrap(
           spacing: 10,
@@ -72,16 +73,15 @@ class _ColorPickerGridState extends State<ColorPickerGrid> {
             return GestureDetector(
               onTap: () => changeColor(color),
               child: Container(
-                width: 36,
-                height: 36,
+                width: 34.w,
+                height: 34.h,
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: selectedColor.value == color.value
                     ? const Center(
-                  child: Icon(Icons.check, color: Colors.white, size: 20),
+                  child: Icon(Icons.check, color: Colors.white, size: 19),
                 )
                     : null,
               ),
@@ -157,7 +157,7 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(4.r),
           child: GestureDetector(
             key: _gestureAreaKey,
             onPanUpdate: (details) => _handleSaturationBrightnessGesture(details.localPosition),
@@ -172,7 +172,7 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         _buildHueSlider(),
       ],
     );
@@ -204,9 +204,9 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
           alignment: Alignment.center,
           children: [
             Container(
-              height: 16,
+              height: 16.h,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 gradient: const LinearGradient(
                   colors: [
                     Color.fromARGB(255, 255, 0, 0),
@@ -222,9 +222,9 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
             ),
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
-                trackHeight: 24,
+                trackHeight: 24.h,
                 thumbShape: CircleThumbShape(
-                  thumbRadius: 8,
+                  thumbRadius: 8.r,
                   color: _currentHsv.toColor(),
                 ),
                 overlayShape: SliderComponentShape.noOverlay,

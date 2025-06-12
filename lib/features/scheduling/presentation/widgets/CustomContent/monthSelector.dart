@@ -1,4 +1,6 @@
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class MonthSelector extends StatelessWidget {
   /// Now a set of selected month abbreviations
   final Set<String> selectedMonths;
@@ -42,28 +44,28 @@ class MonthSelector extends StatelessWidget {
                 onChanged(newSet);
               },
               child: Container(
-                width: 77,
-                height: isSelected ? 36 : 44,
+                width: 74.w,
+                height: isSelected ? 34.h : 42.h,
                 margin: EdgeInsets.only(
-                    left:  colIndex == 0 ? 0 : 11.5,
-                    right: colIndex == 3 ? 0 : 11.5,
-                    top: isSelected? 4 : 0,
-                    bottom: isSelected? 4 : 0
+                    left:  colIndex == 0 ? 0 : 2.w,
+                    right: colIndex == 3 ? 0 : 2.w,
+                    top: isSelected? 4.w : 0,
+                    bottom: isSelected? 4.w : 0
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color.fromRGBO(28, 121, 212, 1)
+                      ? AppColors.primaryColor
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   month,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16.sp,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w400,
-                    color: isSelected ? Colors.white : Colors.black,
+                    color: isSelected ? Colors.white : AppColors.darkBlack,
                   ),
                 ),
               ),

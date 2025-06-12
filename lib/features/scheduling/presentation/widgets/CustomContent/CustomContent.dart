@@ -1,9 +1,11 @@
 import 'package:ers_linux/features/scheduling/presentation/widgets/UnifiedCalender/unifiedCalender.dart';
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import '../CustomCupertinoPicker.dart';
-import '../CustomSwitch.dart';
+import '../shared/CustomCupertinoPicker.dart';
+import '../shared/CustomSwitch.dart';
 import 'monthSelector.dart';
 
 class CustomTab extends StatefulWidget {
@@ -152,53 +154,53 @@ class _CustomTabState extends State<CustomTab> {
     final unitLabel = _unitMap[_selectedFrequency]!;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      // crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Frequency', style: TextStyle(fontSize: 16,fontFamily: 'Inter')),
-              GestureDetector(
-                key: _frequencyKey,
-                onTap: _showFrequencyMenu,
-                child: Row(
+        GestureDetector(
+          key: _frequencyKey,
+          onTap: _showFrequencyMenu,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.5.w, vertical: 8.5.h),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.bookingContainerTileBorder),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Frequency', style: TextStyle(fontSize: 15.sp,fontFamily: 'Inter')),
+                Row(
                   children: [
-                    Text(_selectedFrequency,style: TextStyle(fontFamily: 'Inter'),),
+                    Text(_selectedFrequency,style: TextStyle(fontFamily: 'Inter',fontSize: 14.sp),),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 5,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 5.h,
                       ),
                       child: SvgPicture.asset(
                         'assets/icons/scheduling/booking/updownarrow.svg',
-                        height: 16,
+                        height: 15.h,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 23.h),
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+          padding:  EdgeInsets.symmetric(horizontal: 12.5.w, vertical: 8.5.h),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.bookingContainerTileBorder),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Every', style: TextStyle(fontSize: 16,fontFamily: 'Inter')),
+                  Text('Every', style: TextStyle(fontSize: 15.sp,fontFamily: 'Inter')),
                   GestureDetector(
                     onTap: () => setState(() => _showUnitOptions = !_showUnitOptions),
                     child: Text(
@@ -217,8 +219,8 @@ class _CustomTabState extends State<CustomTab> {
                           (_selectedFrequency == 'Weekly' && _selectedDays.isNotEmpty) ||
                               (_selectedUnitType.isNotEmpty || _selectedUnitValue != null)
                       )
-                          ? const TextStyle(color: Colors.blue,fontFamily: 'Inter')
-                          : const TextStyle(color: Color.fromRGBO(102, 112, 133, 0.5),fontFamily: 'Inter'),
+                          ? TextStyle(color: AppColors.primaryColor,fontFamily: 'Inter',fontSize: 14.sp)
+                          : TextStyle(color: AppColors.containerSelectedItem,fontFamily: 'Inter',fontSize: 14.sp),
 
                     ),
                   ),
@@ -235,13 +237,13 @@ class _CustomTabState extends State<CustomTab> {
                 ],
               ),
               if(_selectedFrequency == 'Daily' && _showUnitOptions) ...[
-                SizedBox(height: 10,),
-                const Divider(
+                SizedBox(height: 10.h,),
+                Divider(
                   height: 1,
-                  thickness: 0.7,
-                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                  thickness: 0.5.w,
+                  color: AppColors.dividerColor
                 ),
-                SizedBox(height: 2,),
+                SizedBox(height: 2.h,),
                 CustomCupertinoPicker(
                   firstColumnOptions: List.generate(31, (i) => i + 1),
                   secondColumnOptions: ['Day/s', 'Working day'],
@@ -255,61 +257,70 @@ class _CustomTabState extends State<CustomTab> {
                 ),
               ],
               if(_selectedFrequency == 'Weekly' && _showUnitOptions) ...[
-                SizedBox(height: 10,),
-                const Divider(
-                  height: 1,
-                  thickness: 0.7,
-                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                SizedBox(height: 10.h,),
+                Divider(
+                    height: 1,
+                    thickness: 0.5.w,
+                    color: AppColors.dividerColor
                 ),
-                SizedBox(height: 2,),
-                CustomCupertinoPicker(
-                  firstColumnOptions: List.generate(6, (i) => i + 1),
-                  secondColumnOptions: ['Weeks'],
-                  onDualColumnSelected: (first, second) {
-                    setState(() {
-                      _selectedUnitValue = first;
-                      _selectedUnitType = second;
-                    });
-                    print("$first $second");
-                  },
+                SizedBox(height: 2.h,),
+                SizedBox(
+                  height: 90.h,
+                  child: CustomCupertinoPicker(
+                    firstColumnOptions: List.generate(6, (i) => i + 1),
+                    secondColumnOptions: ['Weeks'],
+                    onDualColumnSelected: (first, second) {
+                      setState(() {
+                        _selectedUnitValue = first;
+                        _selectedUnitType = second;
+                      });
+                      print("$first $second");
+                    },
+                  ),
                 ),
               ],
               if(_selectedFrequency == 'Monthly' && _showUnitOptions) ...[
-                SizedBox(height: 10,),
-                const Divider(
-                  height: 1,
-                  thickness: 0.7,
-                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                SizedBox(height: 10.h,),
+                Divider(
+                    height: 1.h,
+                    thickness: 0.5.w,
+                    color: AppColors.dividerColor
                 ),
-                SizedBox(height: 2,),
-                CustomCupertinoPicker(
-                  firstColumnOptions: List.generate(12, (i) => i + 1),
-                  secondColumnOptions: ['Months'],
-                  onDualColumnSelected: (first, second) {
-                    setState(() {
-                      _selectedUnitValue = first;
-                      _selectedUnitType = second;
-                    });
-                    print("$first $second");
-                  },
+                SizedBox(height: 2.h,),
+                SizedBox(
+                  height: 90.h,
+                  child: CustomCupertinoPicker(
+                    firstColumnOptions: List.generate(12, (i) => i + 1),
+                    secondColumnOptions: ['Months'],
+                    onDualColumnSelected: (first, second) {
+                      setState(() {
+                        _selectedUnitValue = first;
+                        _selectedUnitType = second;
+                      });
+                      print("$first $second");
+                    },
+                  ),
                 ),
               ],
               if (_selectedFrequency == 'Yearly' && _showUnitOptions) ...[
-                SizedBox(height: 10,),
-                const Divider(
-                  height: 1,
-                  thickness: 0.7,
-                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                SizedBox(height: 10.h,),
+                Divider(
+                  height: 1.h,
+                  thickness: 0.5.w,
+                  color: AppColors.dividerColor,
                 ),
-                CustomCupertinoPicker(
-                  firstColumnOptions: List.generate(5, (i) => i+1),
-                  secondColumnOptions: ['Years'],
-                  onDualColumnSelected: (first, second) {
-                    setState(() {
-                      _yearlyOrdinalCount = first;
-                      _yearlyOrdinalUnit  = second;
-                    });
-                  },
+                SizedBox(
+                  height: 90.h,
+                  child: CustomCupertinoPicker(
+                    firstColumnOptions: List.generate(5, (i) => i+1),
+                    secondColumnOptions: ['Years'],
+                    onDualColumnSelected: (first, second) {
+                      setState(() {
+                        _yearlyOrdinalCount = first;
+                        _yearlyOrdinalUnit  = second;
+                      });
+                    },
+                  ),
                 ),
               ],
 
@@ -337,21 +348,21 @@ class _CustomTabState extends State<CustomTab> {
           ),
         ),
         if(_selectedFrequency == 'Weekly') ...[
-          SizedBox(height: 24,),
+          SizedBox(height: 24.h),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: AppColors.bookingContainerTileBorder),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
+                  blurRadius: 8.r,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(days.length, (index) {
@@ -371,9 +382,9 @@ class _CustomTabState extends State<CustomTab> {
                         });
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 7.h,
                         ),
                         width: double.infinity,
                         color: Colors.transparent,
@@ -382,13 +393,13 @@ class _CustomTabState extends State<CustomTab> {
                             Text(
                               day,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 15.sp,
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.normal,
-                                color: const Color(0xFF272727),
+                                color: AppColors.darkBlack,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8.w),
                             if (isSelected) ...[
                               Spacer(),
                               const Icon(
@@ -402,10 +413,10 @@ class _CustomTabState extends State<CustomTab> {
                       ),
                     ),
                     if (index < days.length - 1)
-                      const Divider(
-                        height: 0.5,
-                        thickness: 0.5,
-                        color: Color.fromRGBO(102, 112, 133, 0.2),
+                      Divider(
+                        height: 0.5.h,
+                        thickness: 0.5.w,
+                        color: AppColors.dividerColor,
                       ),
                   ],
                 );
@@ -414,13 +425,13 @@ class _CustomTabState extends State<CustomTab> {
           )
         ],
         if(_selectedFrequency == 'Monthly') ...[
-          SizedBox(height: 24,),
+          SizedBox(height: 24.h,),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
-                color: const Color.fromRGBO(102, 112, 133, 0.2),
-                width: 0.7,
+                color: AppColors.bookingContainerTileBorder,
+                width: 0.5.w,
               ),
             ),
             child: Padding(
@@ -441,7 +452,7 @@ class _CustomTabState extends State<CustomTab> {
                           child: Text(
                             'Each',
                             style: TextStyle(
-                              color: Color.fromRGBO(102, 112, 133, 1),
+                              color: AppColors.customColor,
                               fontFamily: 'Inter'
                             ),
                           ),
@@ -451,12 +462,12 @@ class _CustomTabState extends State<CustomTab> {
                           const Icon(
                             Icons.check,
                             size: 16,
-                            color: Color.fromRGBO(28, 121, 212, 1),
+                            color: AppColors.darkBlack
                           )
                       ],
                     ),
                   ),
-                  Divider(height: 1, color: Color.fromRGBO(102, 112, 131, 0.2)),
+                  Divider(height: 1.h, color: AppColors.dividerColor),
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Row(
@@ -470,7 +481,7 @@ class _CustomTabState extends State<CustomTab> {
                           child: Text(
                             'On the',
                             style: TextStyle(
-                              color: Color.fromRGBO(102, 112, 133, 1),
+                              color: AppColors.customColor,
                               fontFamily: 'Inter'
                             ),
                           ),
@@ -480,7 +491,7 @@ class _CustomTabState extends State<CustomTab> {
                           const Icon(
                             Icons.check,
                             size: 16,
-                            color: Color.fromRGBO(28, 121, 212, 1),
+                            color: AppColors.darkBlack,
                           )
                       ],
                     ),
@@ -504,26 +515,29 @@ class _CustomTabState extends State<CustomTab> {
                       },
                     ),
                   if (showDialer)
-                    CustomCupertinoPicker(
-                      firstColumnOptions: ['1st', '2nd', '3rd', '4th', 'last'],
-                      secondColumnOptions: [
-                        'Day',
-                        'Working Day',
-                        'Sunday',
-                        'Monday',
-                        'Tuesday',
-                        'Wednesday',
-                        'Thursday',
-                        'Friday',
-                        'Saturday',
-                      ],
-                      onDualColumnSelected: (first, second) {
-                        setState(() {
-                          _selectedUnitValue = first;
-                          _selectedUnitType = second;
-                          print('$_selectedUnitValue $_selectedUnitType');
-                        });
-                      },
+                    SizedBox(
+                      height: 120.h,
+                      child: CustomCupertinoPicker(
+                        firstColumnOptions: ['1st', '2nd', '3rd', '4th', 'last'],
+                        secondColumnOptions: [
+                          'Day',
+                          'Working Day',
+                          'Sunday',
+                          'Monday',
+                          'Tuesday',
+                          'Wednesday',
+                          'Thursday',
+                          'Friday',
+                          'Saturday',
+                        ],
+                        onDualColumnSelected: (first, second) {
+                          setState(() {
+                            _selectedUnitValue = first;
+                            _selectedUnitType = second;
+                            print('$_selectedUnitValue $_selectedUnitType');
+                          });
+                        },
+                      ),
                     ),
                 ],
               ),
@@ -531,12 +545,12 @@ class _CustomTabState extends State<CustomTab> {
           )
         ],
         if(_selectedFrequency == 'Yearly') ...[
-          SizedBox(height: 24,),
+          SizedBox(height: 23.h),
           Container(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+            padding:  EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.bookingContainerTileBorder),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -557,47 +571,50 @@ class _CustomTabState extends State<CustomTab> {
                   ],
                 ),
                 if (toggleSwitch) ...[
-                  const SizedBox(height: 10),
-                  const Divider(height: 1 , color: Color.fromRGBO(208, 213, 221, 1)),
-                  CustomCupertinoPicker(
-                    firstColumnOptions: ['1st', '2nd', '3rd', '4th', 'last'],
-                    secondColumnOptions: [
-                      'Day',
-                      'Working Day',
-                      'Sunday',
-                      'Monday',
-                      'Tuesday',
-                      'Wednesday',
-                      'Thursday',
-                      'Friday',
-                      'Saturday',
-                    ],
-                    onDualColumnSelected: (first, second) {
-                      setState(() {
-                        _selectedUnitValue = first;
-                        _selectedUnitType = second;
-                      });
-                    },
+                  SizedBox(height: 9.h),
+                  Divider(height: 1.h, color: AppColors.dividerColor),
+                  SizedBox(
+                    height: 115.h,
+                    child: CustomCupertinoPicker(
+                      firstColumnOptions: ['1st', '2nd', '3rd', '4th', 'last'],
+                      secondColumnOptions: [
+                        'Day',
+                        'Working Day',
+                        'Sunday',
+                        'Monday',
+                        'Tuesday',
+                        'Wednesday',
+                        'Thursday',
+                        'Friday',
+                        'Saturday',
+                      ],
+                      onDualColumnSelected: (first, second) {
+                        setState(() {
+                          _selectedUnitValue = first;
+                          _selectedUnitType = second;
+                        });
+                      },
+                    ),
                   ),
                 ],
               ],
             ),
           ),
-          SizedBox(height: 24,),
+          SizedBox(height: 23.h,),
           Container(
             width: double.infinity,
             // margin: EdgeInsets.only(top: 4),
             padding: EdgeInsets.all(14),
             // alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
-                color: const Color.fromRGBO(102, 112, 133, 0.2),
-                width: 0.7,
+                color: AppColors.bookingContainerTileBorder,
+                width: 0.7.w,
               ),
             ),
             child: MonthSelector(
-              selectedMonths: _yearlySelectedMonths,   // <-- the Set<String>
+              selectedMonths: _yearlySelectedMonths,
               onChanged: (newSet) => setState(() {
                 _yearlySelectedMonths = newSet;
               }),
@@ -613,25 +630,25 @@ class _CustomTabState extends State<CustomTab> {
             // ),
           ),
         ],
-        SizedBox(height: 12,),
+        SizedBox(height: 12.h,),
         Row(
           children: [
             InkWell(
               onTap: _selectedUnitType.contains('Working day') ? null : _toggleCheckbox,
               child: Container(
-                width: 14,
-                height: 14,
+                width: 13.5.w,
+                height: 13.5.h,
                 decoration: BoxDecoration(
-                  color: isChecked ? Color.fromRGBO(28, 121, 212, 1) : null,
+                  color: isChecked ? AppColors.primaryColor : null,
                   border: Border.all(
                     // color: Color.fromRGBO(39, 39, 39, 1),
                     color:
                     isChecked
-                        ? Color.fromRGBO(28, 121, 212, 1)
-                        : Color.fromRGBO(39, 39, 39, 1),
-                    width: 0.7,
+                        ? AppColors.primaryColor
+                        : AppColors.darkBlack,
+                    width: 0.7.w,
                   ),
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(3.r),
                 ),
                 child:
                 isChecked
@@ -645,8 +662,8 @@ class _CustomTabState extends State<CustomTab> {
                     : null,
               ),
             ),
-            SizedBox(width: 8),
-             Text('Skip Non-Working Day', style: TextStyle(fontSize: 14,fontFamily: 'Inter',color: (_selectedUnitType.contains('Working day'))? Colors.grey : Colors.black),),
+            SizedBox(width: 8.w),
+             Text('Skip Non-Working Day', style: TextStyle(fontSize: 13.sp,fontFamily: 'Inter',color: (_selectedUnitType.contains('Working day'))? Colors.grey : Colors.black),),
           ],
         ),
 

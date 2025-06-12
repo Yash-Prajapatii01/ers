@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../../../shared/theme/app_colors.dart';
 class EndRepeatRow extends StatelessWidget {
   final List<String> options;
   final String label, value;
@@ -26,7 +29,7 @@ class EndRepeatRow extends StatelessWidget {
 
         // Popup menu positioned above the widget
         final RelativeRect pos = RelativeRect.fromLTRB(
-          offset.dx + size.width - 200,
+          offset.dx + size.width - 200.w,
           offset.dy - (51.2 * options.length) - 10.5,
           overlay.size.width - offset.dx - size.width - 16.5,
           offset.dy,
@@ -99,23 +102,24 @@ class EndRepeatRow extends StatelessWidget {
         if (choice != null) onSelected(choice);
       },
       child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        height: 42.h,
+        color: Colors.transparent,
+        padding: EdgeInsets.symmetric(vertical: 4.h),
         child: Row(
           children: [
-            Text(label, style: const TextStyle(fontSize: 16, fontFamily: 'Inter')),
+            Text(label, style:  TextStyle(fontSize: 15.sp, fontFamily: 'Inter')),
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF444444), fontFamily: 'Inter'),
+              style: TextStyle(fontSize: 15.sp, color: AppColors.darkBlack, fontFamily: 'Inter'),
             ),
             // const SizedBox(width: 4),
             Padding(
               padding: EdgeInsets.fromLTRB(8.0, 5.0, 0, 5.0),
               child: Image.asset(
                 'assets/icons/scheduling/booking/img.png',
-                width: 8,
-                height: 20,
+                width: 8.w,
+                height: 20.h,
               ),
               // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
             ),

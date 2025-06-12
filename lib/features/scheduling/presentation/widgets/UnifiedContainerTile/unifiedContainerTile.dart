@@ -1,17 +1,20 @@
+import 'package:ers_linux/features/scheduling/data/models/udfOptionsModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../../shared/theme/app_colors.dart';
 import '../../utils/showBottomSheet.dart';
-import '../CustomTextField.dart';
-import '../PillText.dart';
+import '../shared/CustomTextField.dart';
+import '../shared/PillText.dart';
 import 'tile_interaction_type.dart';
-
 
 class UnifiedContainerTile extends StatefulWidget {
   // Common properties
   final String title;
   final String? iconPath;
   final String? itemText;
+  final bool? isRequired;
 
   // Appearance properties
   final Color? backgroundColor;
@@ -53,10 +56,13 @@ class UnifiedContainerTile extends StatefulWidget {
 
   // For action callbacks
   final Function(String)? onOptionSelected;
-  final Function(List<String>)? onMultipleOptionsSelected;
+  final Function(List<int>)? onMultipleOptionsSelected;
   final Function(double)? onSliderChanged;
-  final Function(String)? onTextChanged;
-  final VoidCallback? onDonePressed;
+  final Function(double)? onFieldFilled;
+  final Function(String)? onDateSelected;
+  final Function(DateTime)? onDateTimeSelected;
+
+  // final Function(String)? onTextChanged;
 
   const UnifiedContainerTile({
     super.key,
@@ -66,6 +72,7 @@ class UnifiedContainerTile extends StatefulWidget {
     this.interactionType = TileInteractionType.none,
     this.backgroundColor = Colors.white,
     this.borderColor = const Color.fromRGBO(208, 213, 221, 1),
+    this.isRequired = false,
 
     // Navigation properties
     this.navigationTarget,
@@ -101,18 +108,21 @@ class UnifiedContainerTile extends StatefulWidget {
     this.onOptionSelected,
     this.onMultipleOptionsSelected,
     this.onSliderChanged,
-    this.onTextChanged,
-    this.onDonePressed,
+    this.onFieldFilled,
+    this.onDateSelected,
+    this.onDateTimeSelected,
+    // this.onTextChanged,
     this.fullSizeBottomSheet = false,
   });
 
   @override
   State<UnifiedContainerTile> createState() => _UnifiedContainerTileState();
 }
+
 class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
-  late String _itemText;
+  late String _trailingText;
   String _selectedOption = '';
-  List<String> _selectedOptions = [];
+  List<UdfOptionsModel> _selectedOptions = [];
   bool _isExpanded = false;
   double _sliderValue = 0.0;
   final TextEditingController _effortController = TextEditingController();
@@ -122,9 +132,9 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
   @override
   void initState() {
     super.initState();
-    _itemText = widget.itemText ?? '';
+    _trailingText = widget.itemText ?? '';
     _selectedOption = widget.initialSelectedOption ?? '';
-    _selectedOptions = widget.initialSelectedOptions?.toList() ?? [];
+    // _selectedOptions = widget.initialSelectedOptions?.toList() ?? [];
     _isExpanded = widget.initiallyExpanded;
     _sliderValue = widget.initialSliderValue ?? 0.0;
   }
@@ -145,45 +155,259 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
           );
         }
         break;
+      case TileInteractionType.popupMenu:
+        _showPopupMenu();
+        break;
       case TileInteractionType.bottomSheet:
         if (widget.bottomSheetContent != null) {
-          if (widget.bottomSheetContent != null) {
-            BottomSheetService.showCustomBottomSheet(
-              context: context,
-              child: widget.bottomSheetContent!,
-              startFullSize: widget.fullSizeBottomSheet ?? true,
-              onSelected: (result) {
-                if (result is Map<String, dynamic>) {
-                  setState(() {
-                    switch (result['type']) {
-                      case 'label-color':
-                        selectedLabel = result['label'];
-                        selectedColor = result['color'];
-                        _itemText = selectedLabel!;
-                        widget.onTextChanged?.call(selectedLabel!);
-                        break;
-                      case 'color':
-                        final int? colorVal = int.tryParse(result['color']);
-                        if (colorVal != null) {
-                          selectedLabel = null;
-                          selectedColor = Color(colorVal);
-                          _itemText = '';
-                          widget.onTextChanged?.call('');
-                        }
-                        break;
-                      case 'text':
+          BottomSheetService.showCustomBottomSheet(
+            context: context,
+            child: widget.bottomSheetContent!,
+            startFullSize: widget.fullSizeBottomSheet ?? true,
+            // onSelected: (result) {
+            //   if (result is List<UdfOptionsModel>) {
+            //     setState(() {
+            //       // Handle multiple selections from DDMS
+            //       _selectedOptions = result;
+            //
+            //       if (result.isNotEmpty) {
+            //         final firstItem = result.first;
+            //         final extraCount = result.length - 1;
+            //
+            //         // Check what type of data the first item contains
+            //         if (firstItem.color != null && firstItem.name.isNotEmpty) {
+            //           // Case: label-color (has both label and color)
+            //           selectedLabel = firstItem.name;
+            //           selectedColor = firstItem.color;
+            //           _itemText = extraCount > 0
+            //               ? '${firstItem.name} +$extraCount'
+            //               : firstItem.name;
+            //           widget.onOptionSelected?.call(_itemText);
+            //
+            //         } else if (firstItem.color != null && (firstItem.name.isEmpty || firstItem.name == '')) {
+            //           // Case: color only (has color but no meaningful label)
+            //           selectedLabel = null;
+            //           selectedColor = firstItem.color;
+            //           _itemText = extraCount > 0
+            //               ? 'Color +$extraCount'
+            //               : '';
+            //           widget.onOptionSelected?.call(selectedColor.toString());
+            //
+            //         } else {
+            //           // Case: text only (has label/name but no color)
+            //           selectedLabel = null;
+            //           selectedColor = null;
+            //           _itemText = extraCount > 0
+            //               ? '${firstItem.name} +$extraCount'
+            //               : firstItem.name;
+            //           widget.onOptionSelected?.call(_itemText);
+            //         }
+            //
+            //         // If you need to pass the selected indices/IDs to a callback
+            //         final selectedIds = result.map((item) => item.id).toList();
+            //         widget.onMultipleOptionsSelected?.call(selectedIds);
+            //       } else {
+            //         // No selections - reset everything
+            //         selectedLabel = null;
+            //         selectedColor = null;
+            //         _itemText = '';
+            //       }
+            //     });
+            //   } else if (result is Map<String, dynamic>) {
+            //     // Handle other types of results (your existing logic)
+            //     setState(() {
+            //       switch (result['type']) {
+            //         case 'label-color':
+            //           selectedLabel = result['label'];
+            //           selectedColor = result['color'];
+            //           _itemText = selectedLabel!;
+            //           widget.onOptionSelected?.call(selectedLabel!);
+            //           break;
+            //         case 'color':
+            //           final int? colorVal = int.tryParse(result['color']);
+            //           if (colorVal != null) {
+            //             selectedLabel = null;
+            //             selectedColor = Color(colorVal);
+            //             _itemText = '';
+            //             widget.onOptionSelected?.call(selectedColor.toString());
+            //           }
+            //           break;
+            //         case 'text':
+            //           selectedLabel = null;
+            //           selectedColor = null;
+            //           _itemText = result['text'];
+            //           widget.onOptionSelected?.call(result['text']);
+            //           break;
+            //       }
+            //     });
+            //   }
+            // },//todo v2
+            // onSelected: (result) {
+            //   if (result is List<UdfOptionsModel>) {
+            //     setState(() {
+            //       switch (result['type']) {
+            //         case 'label-color':
+            //           selectedLabel = result['label'];
+            //           selectedColor = result['color'];
+            //           _itemText = selectedLabel!;
+            //           widget.onOptionSelected?.call(selectedLabel!);
+            //           // widget.onTextChanged?.call(selectedLabel!);
+            //           break;
+            //         case 'color':
+            //           final int? colorVal = int.tryParse(result['color']);
+            //           if (colorVal != null) {
+            //             selectedLabel = null;
+            //             selectedColor = Color(colorVal);
+            //             _itemText = '';
+            //             widget.onOptionSelected?.call(selectedColor.toString());
+            //             // widget.onTextChanged?.call('');
+            //           }
+            //           break;
+            //         case 'text':
+            //           selectedLabel = null;
+            //           selectedColor = null;
+            //           _itemText = result['text'];
+            //           widget.onOptionSelected?.call(result['text']);
+            //           break;
+            //       }
+            //     });
+            //   }
+            // },
+            onSelected: (result) {
+              print("result -$result");
+              print(result.runtimeType);
+              if (result is List<UdfOptionsModel>) {
+                setState(() {
+                  // Store the selected options
+                  _selectedOptions = result;
+
+                  if (result.isNotEmpty) {
+                    final firstItem = result.first;
+                    final extraCount = result.length - 1;
+
+                    // Check what type of data the first item contains
+                    if (firstItem.color != Colors.transparent && firstItem.name.isNotEmpty) {
+                      // Case: label-color (has both label and color)
+                      selectedLabel = firstItem.name;
+                      selectedColor = firstItem.color;
+                      _trailingText = extraCount > 0
+                          ? '${firstItem.name} +$extraCount'
+                          : firstItem.name;
+
+                    } else if (firstItem.color != Colors.transparent && (firstItem.name.isEmpty || firstItem.name == '')) {
+                      // Case: color only (has color but no meaningful label)
+                      selectedLabel = null;
+                      selectedColor = firstItem.color;
+                      _trailingText = extraCount > 0
+                          ? 'Color +$extraCount'
+                          : '';
+
+                    } else {
+                      // Case: text only (has label/name but no color)
+                      selectedLabel = null;
+                      selectedColor = null;
+                      _trailingText = extraCount > 0
+                          ? '${firstItem.name} +$extraCount'
+                          : firstItem.name;
+                    }
+
+                    // Extract IDs and call the callback
+                    final selectedIds = result.map((item) => item.id).toList();
+                    widget.onMultipleOptionsSelected?.call(selectedIds);
+
+                    // Also call single option callback with display text
+                    widget.onOptionSelected?.call(_trailingText);
+
+                  } else {
+                    // No selections - reset everything
+                    selectedLabel = null;
+                    selectedColor = null;
+                    _trailingText = '';
+                    widget.onMultipleOptionsSelected?.call([]);
+                  }
+                });}
+              // ───────────────────────────────────────
+              // 2. String Result Branch (MISSING)
+              // ───────────────────────────────────────
+              // If bottom sheet returned a String (e.g., custom text, single selection, date string),
+              // we must update the display text and bubble up to onOptionSelected.
+              if (result is String) {
+                setState(() {
+                  _trailingText = result;
+                  print("Result is String here....");
+                });
+                widget.onOptionSelected?.call(result);
+                return;
+              }
+
+              // ───────────────────────────────────────
+              // 3. Map<String, dynamic> Branch (Label + Color / Date + Time)
+              // ───────────────────────────────────────
+              if (result is Map<String, dynamic>) {
+                setState(() {
+                  print("Result is Map here....");
+                  // Example: { 'label': 'Priority A', 'color': Color(0xFF...), 'type': 'label-color' }
+                  switch (result['type']) {
+                    case 'label-color':
+                      selectedLabel = result['label'] as String?;
+                      selectedColor = result['color'] as Color?;
+                      _trailingText = selectedLabel ?? '';
+                      widget.onOptionSelected?.call(_trailingText);
+                      break;
+                    case 'color':
+                      final colorVal = int.tryParse(result['color'] as String);
+                      if (colorVal != null) {
+                        selectedLabel = null;
+                        selectedColor = Color(colorVal);
+                        _trailingText = ''; // You can decide how to render a pure color swatch
+                        widget.onOptionSelected?.call(selectedColor!.value.toString());
+                      }
+                      break;
+                    case 'text':
+                      final textVal = result['text'] as String?;
+                      if (textVal != null) {
                         selectedLabel = null;
                         selectedColor = null;
-                        _itemText = result['text'];
-                        widget.onTextChanged?.call(result['text']);
-                        break;
-                    }
-                  });
-                }
-              },
-            );
-          }
-          break;
+                        _trailingText = textVal;
+                        widget.onOptionSelected?.call(textVal);
+                      }
+                      break;
+                    default:
+                      break;
+                  }
+                });
+                return;
+              }
+              // } else if (result is Map<String, dynamic>) {
+              //   // Handle other types of results (your existing logic)
+              //   setState(() {
+              //     switch (result['type']) {
+              //       case 'label-color':
+              //         selectedLabel = result['label'];
+              //         selectedColor = result['color'];
+              //         _itemText = selectedLabel!;
+              //         widget.onOptionSelected?.call(selectedLabel!);
+              //         break;
+              //       case 'color':
+              //         final int? colorVal = int.tryParse(result['color']);
+              //         if (colorVal != null) {
+              //           selectedLabel = null;
+              //           selectedColor = Color(colorVal);
+              //           _itemText = '';
+              //           widget.onOptionSelected?.call(selectedColor.toString());
+              //         }
+              //         break;
+              //       case 'text':
+              //         selectedLabel = null;
+              //         selectedColor = null;
+              //         _itemText = result['text'];
+              //         widget.onOptionSelected?.call(result['text']);
+              //         break;
+              //     }
+              //   });
+              // }
+            },
+          );
         }
         break;
       case TileInteractionType.expandable:
@@ -195,6 +419,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
         break;
     }
   }
+
   Future<void> _showPopupMenu() async {
     if (widget.popMenuOptions == null || widget.popMenuOptions!.isEmpty) return;
 
@@ -287,44 +512,64 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // width: double.infinity,
-      height: _isExpanded ? 125 : 46,
-      padding: const EdgeInsets.symmetric(horizontal: 13.5, vertical: 9.5),
-      decoration: BoxDecoration(
-        color: widget.backgroundColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: widget.borderColor ?? const Color.fromRGBO(208, 213, 221, 1),
-          width: 0.5,
+    return GestureDetector(
+      onTap: _handleTileTap,
+      child: Container(
+        // width: double.infinity,
+        height: _isExpanded ? 120.w : 44.w,
+        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 9.h),
+        decoration: BoxDecoration(
+          color: widget.backgroundColor,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(
+            color: widget.borderColor ?? AppColors.bookingContainerTileBorder,
+            width: 0.5.w,
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Main tile content
-          Row(
-            children: [
-              widget.iconPath != null ? SvgPicture.asset(widget.iconPath ?? 'assets/icons/scheduling/booking/email.svg') : SizedBox.shrink(),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF212121),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Main tile content
+            Row(
+              children: [
+                widget.iconPath != null
+                    ? SvgPicture.asset(
+                      'assets/icons/scheduling/booking/${widget.iconPath}.svg' ??
+                          'assets/icons/scheduling/booking/email.svg',
+                    )
+                    : SizedBox.shrink(),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      text: widget.title,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.darkBlack,
+                      ),
+                      children:
+                          widget.isRequired!
+                              ? [
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ]
+                              : [],
+                    ),
                   ),
                 ),
-              ),
-              _buildTrailingWidget(),
-            ],
-          ),
-          if (_isExpanded &&
-              widget.interactionType == TileInteractionType.expandable)
-            _buildSlider(),
-        ],
+                _buildTrailingWidget(),
+              ],
+            ),
+            if (_isExpanded &&
+                widget.interactionType == TileInteractionType.expandable)
+              _buildSlider(),
+          ],
+        ),
       ),
     );
   }
@@ -332,64 +577,83 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
   Widget _buildTrailingWidget() {
     switch (widget.interactionType) {
       case TileInteractionType.navigation:
-        return GestureDetector(onTap: _handleTileTap,child: const Icon(Icons.chevron_right, color: Colors.grey));
+        return GestureDetector(
+          onTap: _handleTileTap,
+          child: Icon(
+            Icons.chevron_right,
+            color: AppColors.containerSelectedItem,
+          ),
+        );
 
       case TileInteractionType.bottomSheet:
         return Row(
           children: [
             if (selectedLabel != null && selectedColor != null) ...[
               // if(selectedLabel != 'None')
-                Container(
-                  width: 80,
-                  height: 25,
-                  decoration: BoxDecoration(
-                    color: selectedColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Center(
-                    child: Text(
-                      selectedLabel!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      ),
+              // selectedColor == Colors.transparent
+              //     ? Text(
+              //   selectedLabel!,
+              //   style: TextStyle(
+              //     fontSize: 13.5.sp,
+              //     fontWeight: FontWeight.w400,
+              //     color: AppColors.darkBlack,
+              //   ),
+              // )
+              //     :
+              Container(
+                // width: 78.w,
+                // height: 24.h,
+                padding:
+                    selectedColor == Colors.transparent
+                        ? EdgeInsets.zero
+                        : EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: selectedColor,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Center(
+                  child: Text(
+                    selectedLabel!,
+                    style: TextStyle(
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.darkBlack,
                     ),
                   ),
                 ),
+              ),
             ],
             if (selectedColor != null && selectedLabel == null) ...[
               Container(
-                width: 24,
-                height: 24,
+                width: 23.w,
+                height: 23.w,
                 decoration: BoxDecoration(
                   color: selectedColor,
-                  borderRadius: BorderRadius.circular(5)
+                  borderRadius: BorderRadius.circular(5.r),
                 ),
               ),
-            ] ,if(selectedColor == null) ...[
-                Container(
-                  constraints: BoxConstraints(
-                    maxWidth: 150 // how maximum of width the user input can be shown it customized here...
-                  ),
-                  child: Text(
-                    _itemText,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromRGBO(102, 112, 133, 0.5),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
             ],
-            GestureDetector(
-            onTap: _handleTileTap,
-              child: const Icon(
-                Icons.keyboard_arrow_down,
-                color: Color.fromRGBO(102, 112, 133, 0.5),
+            if (selectedColor == null) ...[
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth:
+                      145.w, // how maximum of width the user input can be shown it customized here...
+                ),
+                child: Text(
+                  _trailingText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.containerSelectedItem,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
+            ],
+            const Icon(
+              Icons.keyboard_arrow_down,
+              color: AppColors.containerSelectedItem,
             ),
           ],
         );
@@ -399,78 +663,79 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
           return Row(
             children: [
               GestureDetector(
-                onTap: () => BottomSheetService.showCustomBottomSheet(
-                  context: context,
-                  child: BottomSheetOptions(
-                    isTextFieldNeeded: true,
-                    customTextField: CustomTextField(
-                      hintText: 'Effort',
-                      controller: _effortController,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    onDone: () => setState(() {}),
-                  ),
-                  startFullSize: false,
-                  onSelected: (result) {
-                    if (result is Map<String, dynamic>) {
-                      setState(() {
-                        // For example, handle submitted effort
-                        if (result['text'] != null) {
-                          _effortController.text = result['text'];
+                onTap:
+                    () => BottomSheetService.showCustomBottomSheet(
+                      context: context,
+                      child: BottomSheetOptions(
+                        isTextFieldNeeded: true,
+                        customTextField: CustomTextField(
+                          hintText: 'Effort',
+                          controller: _effortController,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        onDone: () => setState(() {}),
+                      ),
+                      startFullSize: false,
+                      onSelected: (result) {
+                        if (result is Map<String, dynamic>) {
+                          setState(() {
+                            // For example, handle submitted effort
+                            if (result['text'] != null) {
+                              _effortController.text = result['text'];
+                            }
+                          });
                         }
-                      });
-                    }
-                  },
-                ),
-                    // () => showCustomBottomSheet(
-                    //   context,
-                    //   BottomSheetOptions(
-                    //     isTextFieldNeeded: true,
-                    //     customTextField: CustomTextField(
-                    //       hintText: 'Effort',
-                    //       controller: _effortController,
-                    //       inputFormatters: [
-                    //         FilteringTextInputFormatter.digitsOnly,
-                    //       ],
-                    //       onChanged: (_) => setState(() {}),
-                    //     ),
-                    //     onDone: () => setState(() {}),
-                    //   ),
-                    //   startFullSize: false,
-                    // ),
+                      },
+                    ),
+                // () => showCustomBottomSheet(
+                //   context,
+                //   BottomSheetOptions(
+                //     isTextFieldNeeded: true,
+                //     customTextField: CustomTextField(
+                //       hintText: 'Effort',
+                //       controller: _effortController,
+                //       inputFormatters: [
+                //         FilteringTextInputFormatter.digitsOnly,
+                //       ],
+                //       onChanged: (_) => setState(() {}),
+                //     ),
+                //     onDone: () => setState(() {}),
+                //   ),
+                //   startFullSize: false,
+                // ),
                 child: PillText(
                   // width: 49,
-                  height: 24,
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  height: 24.w,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
                   _effortController.text.isNotEmpty
                       ? _effortController.text.trim()
                       : "Add",
-                  Color.fromRGBO(102, 112, 133, 0.5),
+                  AppColors.pillText,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               InkWell(
                 onTap: _showPopupMenu,
                 child: Row(
                   children: [
                     PillText(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
                       // width: 90,
-                      height: 24,
+                      height: 24.w,
                       _selectedOption.isEmpty
                           ? (widget.popMenuOptions?.isNotEmpty == true
                               ? widget.popMenuOptions!.first
                               : "Select")
                           : _selectedOption,
-                      Color.fromRGBO(102, 112, 133, 0.5),
+                      AppColors.pillText,
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 5.0,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 7.6.w,
+                        vertical: 4.8.h,
                       ),
                       child: SvgPicture.asset(
                         'assets/icons/scheduling/booking/updownarrow.svg',
@@ -488,22 +753,21 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
             child: Row(
               children: [
                 Container(
-                  constraints: BoxConstraints(
-                    maxWidth: 130
-                  ),
+                  constraints: BoxConstraints(maxWidth: 145.w),
                   child: Text(
                     _selectedOption.isEmpty ? "" : _selectedOption,
                     overflow: TextOverflow.ellipsis,
                     // can add 'Select for better UX'
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
-                      color: Color.fromRGBO(102, 112, 133, 0.5),
+                      color: AppColors.containerSelectedItem,
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
+                    //todo work here for the util
                     horizontal: 8.0,
                     vertical: 5.0,
                   ),
@@ -520,15 +784,12 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
       case TileInteractionType.expandable:
         return Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                '${_sliderValue.toInt()}%',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color.fromRGBO(102, 112, 133, 0.5),
-                  overflow: TextOverflow.ellipsis,
-                ),
+            Text(
+              '${_sliderValue.toInt()}%',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: AppColors.containerSelectedItem,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Icon(
@@ -547,42 +808,37 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
-        const Divider(thickness: 0.7, color: Color(0xFFE0E0E0)),
+        SizedBox(height: 9.h),
+        Divider(thickness: 0.5.w, color: AppColors.dividerColor),
         // const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: const Color(0xff1C79D4),
-              inactiveTrackColor: const Color(0xffF4F4F4),
-              thumbColor: Colors.white,
-              overlayColor: const Color(0x330B5FFF),
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 13.5),
-              trackHeight: 4,
-            ),
-            child: Slider(
-              value: _sliderValue,
-              min: 0,
-              max: 100,
-              divisions: 100,
-              onChanged: (value) {
-                setState(() {
-                  _sliderValue = value;
-                });
-                if (widget.onSliderChanged != null) {
-                  widget.onSliderChanged!(value);
-                }
-              },
-            ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: AppColors.primaryColor,
+            inactiveTrackColor: AppColors.pillTextBg,
+            thumbColor: Colors.white,
+            // overlayColor: const Color(0x330B5FFF),
+            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.5.r),
+            trackHeight: 4,
+          ),
+          child: Slider(
+            value: _sliderValue,
+            min: 0,
+            max: 100,
+            divisions: 100,
+            onChanged: (value) {
+              setState(() {
+                _sliderValue = value;
+              });
+              if (widget.onSliderChanged != null) {
+                widget.onSliderChanged!(value);
+              }
+            },
           ),
         ),
       ],
     );
   }
 }
-
-
 
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';

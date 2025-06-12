@@ -1,3 +1,4 @@
+import 'package:ers_linux/features/scheduling/data/models/udfOptionsModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,10 +7,10 @@ import 'package:intl/intl.dart';
 
 import '../../data/models/resource_model.dart';
 import '../widgets/ColorPicker/ColorPicker.dart';
-import '../widgets/CustomTextField.dart';
-import '../widgets/DDMS.dart';
+import '../widgets/shared/CustomTextField.dart';
 import '../widgets/UnifiedCalender/unifiedCalender.dart';
-import '../widgets/priorityWheel.dart';
+import '../widgets/shared/DDMS.dart';
+import '../widgets/shared/priorityWheel.dart';
 
 typedef BottomSheetSelectionCallback = void Function(dynamic selected);
 
@@ -20,7 +21,7 @@ class BottomSheetService {
     bool startFullSize = true,
     BottomSheetSelectionCallback? onSelected,
   }) async {
-    final double initialSize = startFullSize ? 0.90 : 0.50;
+    final double initialSize = startFullSize ? 0.90 : 0.60;
 
     final selected = await showModalBottomSheet<dynamic>(
       context: context,
@@ -41,6 +42,10 @@ class BottomSheetService {
     if (selected == null) return;
 
     // Handle different selection formats
+    if (selected is List<UdfOptionsModel>) {
+      final List<dynamic> selectedIds = selected.map((opt) => opt.id).toList();
+      onSelected?.call({'ids': selectedIds, 'type': 'multi-ids'});
+    }
     if (selected is Resource) {
       onSelected?.call({'resource': selected, 'type': 'resource'});
     }
@@ -64,7 +69,7 @@ class BottomSheetService {
 
 class BottomSheetOptions extends StatefulWidget {
   final String title;
-  final List<String>? options;
+  final List<UdfOptionsModel>? options;
   final VoidCallback? onDone;
   final bool? isSearchEnabled;
   final bool? isTextFieldNeeded;
@@ -74,14 +79,17 @@ class BottomSheetOptions extends StatefulWidget {
   final bool? isTimeWidget;
   final bool? isDragHandleNeeded;
   final bool? isPriority;
+  final String? regex;
+  final double? maxInputLength;
+  final double? minInputLength;
 
   // final bool? isFTRCalender;
   final bool? isDonethere;
   final bool? DDMS;
   final String? SearchHintText;
-  final bool? showCheckboxes; // New property to control DDMS display mode
+  final bool? showCheckboxes;
   final bool? isColorPalleteNeeded;
-  final List<String>? initialSelectedOptions;
+  final List<UdfOptionsModel>? initialSelectedOptions;
   final List<TextInputFormatter>? inputFormatters;
   final DateTime? initialDate;
   final TimeOfDay? initialFromTime;
@@ -110,6 +118,9 @@ class BottomSheetOptions extends StatefulWidget {
     this.SearchHintText = 'Search',
     this.unifiedcontainercontent,
     this.resourceOptions,
+    this.regex,
+    this.maxInputLength,
+    this.minInputLength,
     // this.isFTRCalender,
   });
 
@@ -121,15 +132,14 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedOption;
   String textValue = '';
-  List<String> _filteredOptions = [];
-  List<String> _ddmsSelections = [];
+  List<UdfOptionsModel> _ddmsSelections = [];
   late DateTime _localDate;
   late bool _timePicked = false;
   late TimeOfDay _localTime;
   late Color _localColor;
   String _pickedLabel = 'None';
   Color _pickedColor = Colors.transparent;
-  List<Resource> _filteredResources = [];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -138,62 +148,55 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
     _localDate = widget.initialDate ?? DateTime.now();
     _localTime = widget.initialFromTime ?? TimeOfDay.now();
 
-    _filteredOptions = widget.options ?? [];
-    _filteredResources = widget.resourceOptions ?? [];
     if (widget.DDMS == true && widget.initialSelectedOptions != null) {
       _ddmsSelections.addAll(widget.initialSelectedOptions!);
     }
-    if (widget.isSearchEnabled == true) {
-      _searchController.addListener(_onSearchChanged);
-    }
   }
 
-  void _onSearchChanged() {
-    final q = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredOptions =
-          (widget.options ?? [])
-              .where((o) => o.toLowerCase().contains(q))
-              .toList();
-
-      _filteredResources =
-          (widget.resourceOptions ?? [])
-              .where((r) => r.name.toLowerCase().contains(q))
-              .toList();
-    });
-  }
 
   @override
   void dispose() {
-    if (widget.isSearchEnabled == true) {
-      _searchController.removeListener(_onSearchChanged);
-    }
     _searchController.dispose();
     super.dispose();
   }
 
   void _handleDone() {
+    print('handle done called');
+    if (widget.isTextFieldNeeded == true && _formKey.currentState != null) {
+      final isValid = _formKey.currentState!.validate();
+      if (!isValid) return;
+      print('texfield se exit');
+    }
     String result = '';
+    Map<String,dynamic> resultData;
     if (widget.DDMS == true) {
       if (_ddmsSelections.isNotEmpty) {
         final first = _ddmsSelections.first;
         final extra = _ddmsSelections.length - 1;
-        result = extra > 0 ? '$first +$extra' : first;
+        result = extra > 0 ? '${first.name} +$extra' : '${first.name}';
+        print('DDMS se exit');
       }
     } else if (widget.customTextField != null) {
       result = widget.customTextField!.controller?.text.trim() ?? '';
+      print('customfield se exit');
     } else if (widget.isTextFieldNeeded == true) {
       result = textValue;
+      print('txf se exit');
     } else if (_selectedOption != null) {
+
       result = _selectedOption!;
+      print('_selectionOption se exit');
     } else if (widget.isPriority == true) {
       Navigator.pop<Map<String, dynamic>>(context, {
         'label': _pickedLabel,
         'color': _pickedColor,
-      });
+      }
+      );
+      print('ispriority se exit');
       return;
     } else if (widget.isColorPalleteNeeded == true) {
       result = _localColor.value.toString();
+      print('Colorpallete se exit');
     } else if (widget.isDateWidget!) {
       if (widget.isTimeWidget!) {
         final TimeOfDay useTime = _timePicked ? _localTime : TimeOfDay.now();
@@ -205,12 +208,17 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
           useTime.minute,
         );
         result = DateFormat('d MMM yyyy, h:mm a').format(dt);
+        print('TimeWidget se exit');
       } else {
         result = DateFormat('d MMM yyyy').format(_localDate);
+        print('DateWidget se exit');
       }
     }
 
-    Navigator.pop(context, result);
+    print('_ddmsSelections: ${_ddmsSelections.length}');
+    print('result form show bottom sheet: $result');
+
+    Navigator.pop(context, _ddmsSelections.isEmpty? result : _ddmsSelections);
     widget.onDone?.call();
   }
 
@@ -218,7 +226,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ListView.separated(
-        itemCount: _filteredResources.length,
+        itemCount: widget.resourceOptions!.length,
         separatorBuilder:
             (_, __) => const Divider(
               height: 0.5,
@@ -226,7 +234,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
               color: Color.fromRGBO(0, 0, 0, 0.12),
             ),
         itemBuilder: (ctx, i) {
-          final resource = _filteredResources[i];
+          final resource = widget.resourceOptions![i];
           return Material(
             color: Colors.transparent,
             child: InkWell(
@@ -280,8 +288,15 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
         children: [
           _buildHeader(),
           const Divider(height: 0.5, color: Color.fromRGBO(0, 0, 0, 0.12)),
-          if (widget.isSearchEnabled == true) _buildSearchField(),
-          _buildContent(),
+          if(widget.isSearchEnabled == true) ...[
+            if(widget.options != null) ...[
+              _buildSearchField(),
+              _buildContent()
+            ]
+            else
+              _buildSearchField()
+          ],
+          // _buildContent(),
         ],
       ),
     );
@@ -427,7 +442,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
             borderSide: BorderSide.none,
           ),
         ),
-        onChanged: (_) => setState(() {}), // Triggers suffixIcon rebuild
+        onChanged: (_) => setState(() {}),
       ),
     ),
   );
@@ -503,14 +518,15 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
         ),
       );
     }
-    if (widget.isPriority == true) {
+    if (widget.isPriority == true && widget.options != null) {
       return CustomWheelPicker(
         onSelected: (map) {
           setState(() {
-            _pickedLabel = map['label'] as String;
-            _pickedColor = map['color'] as Color;
+            _pickedLabel = map.name ;
+            _pickedColor = map.color! ;
           });
         },
+        options: widget.options!,
       );
     }
     if (widget.isDateWidget == true && widget.isTimeWidget == true) {
@@ -545,6 +561,9 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
             (widget.customTextField != null)
                 ? CustomTextField(
                   hintText: widget.customTextField!.hintText,
+                  regex: widget.regex,
+                  maxInputLength: widget.maxInputLength,
+                  minInputLength: widget.minInputLength,
                   controller: widget.customTextField?.controller,
                   keyboardType: widget.customTextField!.keyboardType,
                   inputFormatters: widget.customTextField!.inputFormatters,
@@ -554,29 +573,60 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
                   },
                 )
                 : Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextField(
-                    onChanged: (v) {
-                      setState(() {
-                        textValue = v;
-                      });
-                    },
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    expands: true,
-                    style: const TextStyle(fontSize: 16),
-                    decoration: const InputDecoration.collapsed(
-                      hintText: 'Type Something...',
-                    ),
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: TextFormField(
+                  expands: true,
+                  maxLines: null,
+                  minLines: null,
+                  keyboardType: TextInputType.multiline,
+                  style: const TextStyle(fontSize: 16),
+                  inputFormatters: [
+                    // if (widget.maxInputLength != null)
+                    //   LengthLimitingTextInputFormatter(widget.maxInputLength!.toInt()),
+                  ],
+                  onChanged: (v) {
+                    setState(() {
+                      textValue = v;
+                    });
+                  },
+                  validator: (value) {
+                    final input = value ?? '';
+                    final minLength = widget.minInputLength?.toInt() ?? 0;
+                    final maxLength = widget.maxInputLength?.toInt();
+
+                    if (input.length < minLength) {
+                      return 'Value cannot be less than $minLength characters';
+                    }
+                    if (maxLength != null && input.length > maxLength) {
+                      return 'Value cannot be greater than $maxLength characters';
+                    }
+
+                    if (widget.regex != null) {
+                      final regex = RegExp(widget.regex!);
+                      if (!regex.hasMatch(input)) {
+                        return 'Invalid input format';
+                      }
+                    }
+
+                    return null;
+                  },
+                  decoration: const InputDecoration.collapsed(
+                    hintText: 'Type Something...',
                   ),
                 ),
+              )
+
+            )
+
       );
     }
 
     // DDMS multi-selection with new checkbox/non-checkbox mode toggle
     if (widget.DDMS == true) {
       return DDMSSelectableList(
-        options: _filteredOptions,
+        options: widget.options!,
         selectedItems: _ddmsSelections,
         onSelectionChanged:
             (newSel) => setState(() => _ddmsSelections = newSel),
@@ -587,7 +637,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
     if ((widget.resourceOptions != null &&
         widget.resourceOptions!.isNotEmpty)) {
       return Expanded(child: _buildResourceOptionsList());
-    } else {
+    } else { // options for the single selection
       return Expanded(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -598,18 +648,19 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
                   thickness: 0.7,
                   color: Color.fromRGBO(0, 0, 0, 0.12),
                 ),
-            itemCount: _filteredOptions.length,
+            itemCount: widget.options!.length,
             padding: EdgeInsets.zero,
             itemBuilder: (ctx, i) {
-              final opt = _filteredOptions[i];
-              final sel = opt == _selectedOption;
+              final opt = widget.options![i];
+              final sel = opt.name == _selectedOption;
               return Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    setState(() => _selectedOption = opt);
-                    if (widget.isDonethere == false)
-                      Navigator.pop(context, opt);
+                    setState(() => _selectedOption = opt.name);
+                    if (widget.isDonethere == false) {
+                      Navigator.pop(context, opt.name);
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -620,7 +671,7 @@ class _BottomSheetOptionsState extends State<BottomSheetOptions> {
                       children: [
                         Expanded(
                           child: Text(
-                            opt,
+                            opt.name,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class SaturationBrightnessPainter extends CustomPainter {
   final double hue;
   final double saturation;
@@ -46,7 +47,7 @@ class SaturationBrightnessPainter extends CustomPainter {
     Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = 2.w;
     canvas.drawCircle(Offset(pointerX, pointerY), 8, outerPaint);
 
     // Draw inner circle with current color

@@ -1,6 +1,9 @@
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class RepeatRow extends StatelessWidget {
   final String label, value;
+  final bool isRequired;
   final List<String> options;
   final String selectedValue;
   final ValueChanged<String> onSelected;
@@ -9,6 +12,7 @@ class RepeatRow extends StatelessWidget {
     Key? key,
     required this.label,
     required this.value,
+    this.isRequired = false,
     required this.options,
     required this.selectedValue,
     required this.onSelected,
@@ -91,7 +95,7 @@ class RepeatRow extends StatelessWidget {
           position: pos,
           color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             side: const BorderSide(color: Color(0xFFE0E0E0)),
           ),
           elevation: 4,
@@ -101,14 +105,32 @@ class RepeatRow extends StatelessWidget {
       },
       child: Container(
         height: 44,
+        color: Colors.transparent,
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Text(label, style: const TextStyle(fontSize: 16, fontFamily: 'Inter')),
+            Text.rich(
+              TextSpan(
+                text: label,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.darkBlack,
+                ),
+                children: isRequired
+                    ? [
+                  TextSpan(
+                    text: '*',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ]
+                    : [],
+              ),
+            ),
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(fontSize: 16,fontFamily: 'Inter', color: Color(0xFF444444)),
+              style:  TextStyle(fontSize: 15.sp,fontFamily: 'Inter', color: AppColors.darkBlack),
             ),
             // const SizedBox(width: 4),
             Padding(
@@ -119,8 +141,8 @@ class RepeatRow extends StatelessWidget {
               // ),
               child: Image.asset(
                 'assets/icons/scheduling/booking/img.png',
-                width: 8,
-                height: 20,
+                width: 8.w,
+                height: 20.h,
               ),
               // child: SvgPicture.asset('assets/icons/scheduling/booking/updownarrow.svg'),
             ),

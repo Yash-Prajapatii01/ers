@@ -15,33 +15,33 @@ class NotesPageScreen extends StatefulWidget {
 class _NotesPageScreenState extends State<NotesPageScreen> {
   Widget _buildTextInputArea() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding:  EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding:  EdgeInsets.symmetric(horizontal: 16.w),
             decoration: BoxDecoration(
               color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: const TextField(
+            child:  TextField(
               decoration: InputDecoration(
                 hintText: 'Write a note...',
-                hintStyle: TextStyle(color: Colors.grey,fontSize: 16, fontWeight: FontWeight.w400),
+                hintStyle: TextStyle(color: Colors.grey,fontSize: 16.sp, fontWeight: FontWeight.w400),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 9.5),
+                contentPadding: EdgeInsets.symmetric(vertical: 9.5.h),
               ),
             ),
           ),
 
-          const SizedBox(height: 8),
+           SizedBox(height: 8.h),
 
           // Icons row
           Row(
             children: [
               InkWell(
                 child: Padding(
-                  padding: const EdgeInsets.all(2.5),
+                  padding:  EdgeInsets.all(2.5.w),
                   child: SvgPicture.asset('assets/icons/scheduling/gallery.svg'),
                 ),
               ),
@@ -51,7 +51,7 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
               ),
               InkWell(
                 child: Padding(
-                  padding: const EdgeInsets.all(2.5),
+                  padding:  EdgeInsets.all(2.5.r),
                   child: SvgPicture.asset('assets/icons/scheduling/pin.svg'),
                 ),
               ),
@@ -67,13 +67,13 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
           ),
 
           // Bottom padding for home indicator area
-          const SizedBox(height: 8),
+           SizedBox(height: 8.r),
           Container(
-            height: 5,
-            width: 40,
+            height: 5.h,
+            width: 40.w,
             decoration: BoxDecoration(
               color: Colors.black,
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.circular(3.r),
             ),
           ),
         ],
@@ -88,20 +88,20 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
         backgroundColor: Color.fromRGBO(245, 250, 255, 1),
         leadingWidth: MediaQuery.of(context).size.width,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 20.0),
+          padding:  EdgeInsets.only(left: 20.0.w),
           child: Row(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 5, bottom: 17.0),
+                padding:  EdgeInsets.only(top: 5.w, bottom: 17.0.w),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     InkWell(
                       onTap: () => Navigator.pop(context),
-                      borderRadius: BorderRadius.circular(100),
+                      borderRadius: BorderRadius.circular(100.r),
                       child: Container(
-                        width: 30,
-                        height: 30,
+                        width: 30.w,
+                        height: 30.h,
                         alignment: Alignment.centerLeft,
                         child: Icon(
                             Icons.chevron_left_rounded,
@@ -111,11 +111,11 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
                         // child: SvgPicture.asset('assets/icons/chevron_left.svg'),
                       ),
                     ),
-                    SizedBox(width: 4), // Adjust for visual spacing with text
+                    SizedBox(width: 4.w), // Adjust for visual spacing with text
                     Text(
                       'Notes',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                         color: Color.fromRGBO(39, 39, 39, 1),
                       ),
@@ -149,46 +149,6 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
                 //   ],
                 // ),
               ),
-              Spacer(),
-              Padding(
-                padding: const EdgeInsets.only(right: 20.0, bottom: 12),
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color.fromRGBO(16, 24, 40, 0.05),
-                        offset: const Offset(0, 1),
-                        blurRadius: 2,
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(28, 121, 212, 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          8,
-                        ), // Rounded corners
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                    ),
-                    child: Text(
-                      'Save',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        // fontFamily: 'Inter'
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -197,8 +157,8 @@ class _NotesPageScreenState extends State<NotesPageScreen> {
         child: Column(
           children: [
             Spacer(),
-            Image.asset('assets/icons/scheduling/notes.jpg', width: 260, height: 260,),
-            SizedBox(height: 10),
+            Image.asset('assets/icons/scheduling/notes.jpg', width: 260.w, height: 260.h,),
+            SizedBox(height: 10.h),
             Text('You can store all your notes here.'),
             Spacer(),
             _buildTextInputArea()

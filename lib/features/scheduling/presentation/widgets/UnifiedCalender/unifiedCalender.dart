@@ -1,10 +1,12 @@
 import 'package:ers_linux/features/scheduling/presentation/widgets/UnifiedCalender/widgets/PickerType.dart';
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import '../CustomCupertinoPicker.dart';
-import '../PillText.dart';
+import '../shared/CustomCupertinoPicker.dart';
+import '../shared/PillText.dart';
 import 'UI/DateTimeRow.dart';
 import 'UI/EndRepeatRow.dart';
 import 'UI/RepeatRow.dart';
@@ -68,7 +70,6 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   bool pickedFromTime = false;
   bool pickedToDate = false;
   bool pickedToTime = false;
-  bool pickedOnDate = false;
 
   // Calendar display state
   late DateTime displayedMonth;
@@ -227,13 +228,13 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
   Widget build(BuildContext context) {
     return Container(
       padding:
-          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 15.5, vertical: 11.5),
+          widget.remmoveInternalPadding ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 15.0.w, vertical: 11.0.h),
       decoration:
           widget.isRangePicker && !widget.remmoveInternalPadding
               ? BoxDecoration(
-                color: Colors.white,
+                // color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFCFCFCF), width: 0.5),
+                border: Border.all(color: AppColors.bookingContainerTileBorder, width: 0.5.w),
               )
               : null,
       child: Column(
@@ -243,10 +244,11 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
           if (widget.isRangePicker) ...[
             DateTimeRow(
               label: 'From',
+              isRequired: true,
               date: _formatDate(fromDate),
               time: widget.showTime ? _formatTime(fromTime) : null,
-              dateColor: pickedFromDate ? Colors.blue : const Color(0xFF333333),
-              timeColor: pickedFromTime ? Colors.blue : const Color(0xFF333333),
+              dateColor: activePicker == PickerType.fromDate ? AppColors.primaryColor : AppColors.darkBlack,
+              timeColor: activePicker == PickerType.fromTime ? AppColors.primaryColor : AppColors.darkBlack,
               onDateTap: () => _togglePicker(PickerType.fromDate),
               onTimeTap:
                   widget.showTime
@@ -291,9 +293,9 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
 
             // Time section with divider if time is enabled
             if (widget.showTime) ...[
-              const Divider(
-                thickness: 0.7,
-                color: Color.fromRGBO(102, 112, 133, 0.2),
+               Divider(
+                thickness: 0.5.w,
+                color: AppColors.dividerColor,
               ),
               DateTimeRow(
                 label: 'Time',
@@ -324,27 +326,28 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                   },
                 ),
 
-              const Divider(
-                thickness: 0.7,
-                color: Color.fromRGBO(102, 112, 133, 0.2),
+               Divider(
+                thickness: 0.5.w,
+                color: AppColors.dividerColor,
               ),
             ],
           ],
 
           // Only show To section and Repeat options in range picker mode
           if (widget.isRangePicker) ...[
-            const Divider(
+             Divider(
               height: 1,
-              thickness: 0.7,
-              color: Color.fromRGBO(102, 112, 133, 0.2),
+              thickness: 0.5.w,
+              color: AppColors.dividerColor,
             ),
             // To row
             DateTimeRow(
               label: 'To',
+              isRequired: true,
               date: _formatDate(toDate),
               time: widget.showTime ? _formatTime(toTime) : null,
-              dateColor: pickedToDate ? Colors.blue : const Color(0xFF333333),
-              timeColor: pickedToTime ? Colors.blue : const Color(0xFF333333),
+              dateColor: activePicker == PickerType.toDate ? AppColors.primaryColor : AppColors.darkBlack,
+              timeColor: activePicker == PickerType.toTime ? AppColors.primaryColor : AppColors.darkBlack,
               onDateTap: () => _togglePicker(PickerType.toDate),
               onTimeTap:
                   widget.showTime
@@ -372,13 +375,14 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
             // Only show repeat options if provided
             if (widget.repeatOptions != null &&
                 widget.repeatOptions!.isNotEmpty) ...[
-              const Divider(
+              Divider(
                 height: 1,
-                thickness: 0.7,
-                color: Color.fromRGBO(102, 112, 133, 0.2),
+                thickness: 0.5.w,
+                color: AppColors.dividerColor,
               ),
               RepeatRow(
                 label: 'Repeat',
+                isRequired: true,
                 value: repeatRow.isEmpty ? '' : repeatRow,
                 options: widget.repeatOptions!,
                 selectedValue: repeatRow.isEmpty ? '' : repeatRow,
@@ -388,10 +392,10 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
             if (repeatRow.isNotEmpty &&
                 repeatRow != 'None' &&
                 repeatRow != 'Custom') ...[
-              const Divider(
+              Divider(
                 height: 1,
-                thickness: 0.7,
-                color: Color.fromRGBO(102, 112, 133, 0.2),
+                thickness: 0.5.w,
+                color: AppColors.dividerColor,
               ),
               EndRepeatRow(
                 label: 'End Repeat',
@@ -402,14 +406,14 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
               ),
             ],
             if (endRepeat == 'After' && repeatRow != 'Custom' && repeatRow != 'None') ...[
-              const Divider(
+              Divider(
                 height: 1,
-                thickness: 0.7,
-                color: Color.fromRGBO(102, 112, 133, 0.2),
+                thickness: 0.5.w,
+                color: AppColors.dividerColor,
               ),
               Container(
-                height: 40,
-                padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                height: 39.w,
+                padding: EdgeInsets.fromLTRB(0, 4.h, 0, 0),
                 child: Row(
                   children: [
                     Text('After',style: TextStyle(
@@ -421,9 +425,8 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                         setState(() {
                           isAfterSlider = !isAfterSlider;
                         });
-                        print(isAfterSlider);
                       },
-                      child: PillText(width:38,height: 36, afterRow, Color.fromRGBO(39, 39, 39, 1) ,radius: 8, isCalender: false,),
+                      child: PillText(width:36.w,height: 34.h, afterRow, AppColors.darkBlack ,radius: 8.r, isCalender: false,),
                     ),
                   ],
                 ),
@@ -431,11 +434,11 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
 
               // This is the key change - move the picker inside the After section
               if (isAfterSlider) ...[
-                SizedBox(height: 4,),
-                const Divider(
+                SizedBox(height: 4.h),
+                Divider(
                   height: 1,
-                  thickness: 0.7,
-                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                  thickness: 0.5.w,
+                  color: AppColors.dividerColor,
                 ),
                 Center(
                   child: CustomCupertinoPicker(
@@ -453,15 +456,15 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
             ],
             // Then, the On Date section without the CustomCupertinoPicker
             if (endRepeat == 'On Date' && repeatRow != 'Custom' && repeatRow != 'None') ...[
-              const Divider(
+              Divider(
                 height: 1,
-                thickness: 0.7,
-                color: Color.fromRGBO(102, 112, 133, 0.2),
+                thickness: 0.5.w,
+                color: AppColors.dividerColor,
               ),
               // SizedBox(height: 4),
               Container(
-                height: 40,
-                padding: const EdgeInsets.fromLTRB(0,4,0,0),
+                height: 38.5.h,
+                padding: EdgeInsets.fromLTRB(0,4.h,0,0),
                 child: Row(
                   children: [
                     Text('On Date', style: TextStyle(
@@ -472,18 +475,14 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                       onTap: () {
                         setState(() {
                           isActiveCalender = !isActiveCalender;
-                          if (isActiveCalender) {
-                            pickedOnDate = true;
-                          }
                         });
                       },
                       child: PillText(
-                        //todo we have to make the padding and sizing work good PillText have some fault here !!
-                        width: 128,
+                        width: 122.w,
                         // height: 48,
-                        radius: 8,
+                        radius: 8.r,
                         (DateFormat('d MMMM y').format(AfterDate).toString()),
-                        (pickedOnDate || isActiveCalender) ? Colors.blue : Colors.black,
+                        (isActiveCalender) ? AppColors.primaryColor : AppColors.darkBlack,
                         isCalender: true,
                       ),
                     ),
@@ -491,17 +490,16 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                 ),
               ),
               if (isActiveCalender) ...[
-                SizedBox(height: 4,),
-                const Divider(
+                SizedBox(height: 4.h,),
+                Divider(
                   height: 1,
-                  thickness: 0.7,
-                  color: Color.fromRGBO(102, 112, 133, 0.2),
+                  thickness: 0.5.w,
+                  color: AppColors.dividerColor,
                 ),
                 UnifiedCalendar(
                   initialDate: DateTime.now(),
                   onDateSelected: (date) {
                     setState(() {
-                      pickedOnDate = true;
                       AfterDate = date;
                     });
                   },
@@ -618,7 +616,7 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                 }),
           ),
 
-        const SizedBox(height: 12),
+         SizedBox(height: 12.h),
 
         // Month-year picker shown when toggled
         if (showMonthYearPicker)
@@ -675,7 +673,6 @@ class _UnifiedCalendarState extends State<UnifiedCalendar> {
                     displayedMonth.month,
                     day,
                   );
-                  pickedOnDate = true;
                   if (isFrom) {
                     fromDate = date;
                     pickedFromDate = true;

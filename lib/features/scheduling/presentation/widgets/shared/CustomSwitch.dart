@@ -1,18 +1,14 @@
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CustomSwitch extends StatefulWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
-  final Color activeColor;
-  final Color inactiveColor;
-  final Color thumbColor;
 
   CustomSwitch({
     Key? key,
     required this.value,
     required this.onChanged,
-    this.activeColor = const Color.fromRGBO(53, 199, 90, 1),
-    this.inactiveColor = const Color.fromRGBO(233, 233, 235, 1),
-    this.thumbColor = Colors.white,
   }) : super(key: key);
 
   @override
@@ -20,33 +16,36 @@ class CustomSwitch extends StatefulWidget {
 }
 
 class _CustomSwitchState extends State<CustomSwitch> {
+  Color activeColor =  AppColors.switchActiveColor;
+  Color inactiveColor = AppColors.switchInactiveColor;
+  Color thumbColor = Colors.white;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => widget.onChanged(!widget.value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 44,
-        height: 24,
+        width: 42.w,
+        height: 23.w,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: widget.value ? widget.activeColor : widget.inactiveColor,
+          borderRadius: BorderRadius.circular(20.r),
+          color: widget.value ? activeColor : inactiveColor,
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment:
           widget.value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            width: 18,
-            height: 18,
+            width: 17.w,
+            height: 17.h,
             decoration: BoxDecoration(
-                color: widget.thumbColor,
+                color: thumbColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     offset: Offset(0, 3),
-                    blurRadius: 1,
+                    blurRadius: 1.r,
                     spreadRadius: 0,
                     color: const Color.fromRGBO(0, 0, 0, 0.06),
                   ),

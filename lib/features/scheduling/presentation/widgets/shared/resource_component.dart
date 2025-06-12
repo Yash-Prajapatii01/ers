@@ -1,15 +1,19 @@
 import 'package:ers_linux/features/scheduling/presentation/utils/showBottomSheet.dart';
 import 'package:ers_linux/features/scheduling/presentation/widgets/UnifiedContainerTile/unifiedContainerTile.dart';
+import 'package:ers_linux/shared/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../../../shared/constants/text_sizes.dart';
-import '../../data/models/resource_model.dart';
-import 'UnifiedContainerTile/tile_interaction_type.dart';
+import '../../../../../shared/constants/text_sizes.dart';
+import '../../../data/models/resource_model.dart';
+import '../UnifiedContainerTile/tile_interaction_type.dart';
 
 class ResourceSelector extends StatefulWidget {
+  final void Function(String)? onValueChanged;
+  final bool isTasksFieldNeeded;
 
-  const ResourceSelector({super.key});
+  const ResourceSelector({super.key, this.onValueChanged, required this.isTasksFieldNeeded});
 
   @override
   State<ResourceSelector> createState() => _ResourceSelectorState();
@@ -20,13 +24,7 @@ class _ResourceSelectorState extends State<ResourceSelector> {
   String? selectedName;
   String? selectedRole;
 
-  void _onAvatarTap(String url) {
-    setState(() {
-      selectedAvatarUrl = url;
-      selectedName = 'Yash';
-      selectedRole = 'Flutter Developer';
-    });
-  }
+
   final List<Resource> resources = [
     Resource(name: 'Yash', designation: 'Flutter Developer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg'),
     Resource(name: 'Albert', designation: 'Backend Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/2.jpg'),
@@ -46,10 +44,10 @@ class _ResourceSelectorState extends State<ResourceSelector> {
       padding: const EdgeInsets.all(15.5),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
-          color: const Color.fromRGBO(208, 213, 221, 1),
-          width: 0.5,
+          color: AppColors.bookingContainerTileBorder,
+          width: 0.5.w,
         ),
       ),
       child: Column(
@@ -62,7 +60,7 @@ class _ResourceSelectorState extends State<ResourceSelector> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -91,8 +89,8 @@ class _ResourceSelectorState extends State<ResourceSelector> {
                       },
                     ),
                 child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: const Color.fromRGBO(244, 244, 244, 1),
+                  radius: 20.r,
+                  backgroundColor: AppColors.calenderPillColor,
                   child: SvgPicture.asset(
                     'assets/icons/scheduling/booking/add_resource.svg',
                   ),
@@ -100,34 +98,34 @@ class _ResourceSelectorState extends State<ResourceSelector> {
               ),
 
               if (selectedAvatarUrl != null) ...[
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Container(
-                  width: 1,
-                  height: 21,
+                  width: 1.w,
+                  height: 21.h,
                   color: const Color.fromRGBO(82, 82, 82, 0.6),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Row(
                   children: [
                     CircleAvatar(
-                      radius: 20,
+                      radius: 20.r,
                       backgroundImage: NetworkImage(selectedAvatarUrl!),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           selectedName ?? '',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                            fontSize: 14.sp,
                           ),
                         ),
                         Text(
                           selectedRole ?? '',
                           style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               color: Color.fromRGBO(165, 165, 165, 1),
                               fontWeight: FontWeight.w400
                           ),
@@ -139,34 +137,36 @@ class _ResourceSelectorState extends State<ResourceSelector> {
               ]
             ],
           ),
-          const SizedBox(height: 16 ),
+          SizedBox(height: 16.h ),
 
           // Project tile
           UnifiedContainerTile(
             title: 'Project',
-            iconPath: 'assets/icons/scheduling/booking/projects.svg',
+            iconPath: 'projects',
             interactionType: TileInteractionType.bottomSheet,
+            isRequired: true,
             bottomSheetContent: BottomSheetOptions(
               isSearchEnabled: true,
               title: 'Projects',
               showCheckboxes: false,
               DDMS: true,
-              options: ['FocusFlow', 'FitLoop', 'LearnMate', 'StreakSync'],
+              options: []
             ),
           ),
-          const SizedBox(height: 16),
-
           // Task tile
-          UnifiedContainerTile(
-            title: 'Task',
-            iconPath: 'assets/icons/scheduling/booking/ddss.svg',
-            interactionType: TileInteractionType.bottomSheet,
-            bottomSheetContent: BottomSheetOptions(
-              isSearchEnabled: true,
-              title: 'Tasks',
-              options: ['Task A', 'Task B', 'Task C', 'Task D'],
+          if(widget.isTasksFieldNeeded) ...[
+            SizedBox(height: 16.h),
+            UnifiedContainerTile(
+              title: 'Task',
+              iconPath: 'ddss',
+              interactionType: TileInteractionType.bottomSheet,
+              bottomSheetContent: BottomSheetOptions(
+                  isSearchEnabled: true,
+                  title: 'Tasks',
+                  options: []
+              ),
             ),
-          ),
+          ]
         ],
       ),
     );
