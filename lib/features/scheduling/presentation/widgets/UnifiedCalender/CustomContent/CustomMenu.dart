@@ -4,18 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import '../shared/CustomCupertinoPicker.dart';
-import '../shared/CustomSwitch.dart';
+
+import '../../shared/CustomCupertinoPicker.dart';
+import '../../shared/CustomSwitch.dart';
 import 'monthSelector.dart';
 
-class CustomTab extends StatefulWidget {
-  const CustomTab({super.key});
+class CustomMenu extends StatefulWidget {
+  const CustomMenu({super.key});
 
   @override
-  _CustomTabState createState() => _CustomTabState();
+  _CustomMenuState createState() => _CustomMenuState();
 }
 
-class _CustomTabState extends State<CustomTab> {
+class _CustomMenuState extends State<CustomMenu> {
   final List<String> _frequencies = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
   String _selectedFrequency = 'Daily';
   bool _showUnitOptions = false;

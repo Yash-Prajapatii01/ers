@@ -1,5 +1,5 @@
 
-import 'package:ers_linux/features/auth/injection.dart';
+
 import 'package:ers_linux/features/auth/presentation/screens/otp_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,12 +38,7 @@ class ForgotLoginID extends StatelessWidget {
   Widget build(BuildContext context) {
     final emailController = TextEditingController();
 
-    return BlocProvider(
-      create: (_) => AuthenticationBloc(
-        supabaseClient: getIt<SupabaseClient>(),
-        initialState: ForgotLoginIdState()
-      ),
-      child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+    return  BlocBuilder<AuthenticationBloc, AuthenticationState>(
         builder: (context, state) {
           final formState = state as ForgotLoginIdState;
 
@@ -126,7 +121,6 @@ class ForgotLoginID extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }

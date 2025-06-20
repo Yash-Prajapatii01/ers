@@ -14,6 +14,7 @@ class AppColors {
   static const pillText  = Color.fromRGBO(102, 112, 133, 1.0);
   static const pillTextBg = Color.fromRGBO(244, 244, 244, 1.0);
   static const searchBarFilled = Color.fromRGBO(245, 246, 248, 1.0);
+  static const selectedResourceName = Color.fromRGBO(45, 45, 45, 1);
   static const bookingContainerTileBorder = Color.fromRGBO(208, 213, 221, 1);
   static const customColor = Color.fromRGBO(102, 112, 133, 1);
   static const popUpMenuColor = Color.fromRGBO(102, 112, 133, 0.2);

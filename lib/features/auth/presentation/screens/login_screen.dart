@@ -1,4 +1,4 @@
-import 'package:ers_linux/features/auth/injection.dart';
+
 import 'package:ers_linux/features/auth/presentation/screens/single_sign_on.dart';
 import 'package:ers_linux/features/auth/presentation/screens/two_factor_authentication.dart';
 import 'package:flutter/material.dart';
@@ -27,13 +27,7 @@ class LoginScreen extends StatelessWidget {
     final loginController = TextEditingController();
     final passwordController = TextEditingController();
 
-    return BlocProvider(
-      create:
-          (_) => AuthenticationBloc(
-            supabaseClient: getIt<SupabaseClient>(),
-            initialState: const LoginFormState(),
-          ),
-      child: BlocListener<AuthenticationBloc, AuthenticationState>(
+    return BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
             context.go(DashboardScreen.routePath);
@@ -181,7 +175,6 @@ class LoginScreen extends StatelessWidget {
             );
           },
         ),
-      ),
-    );
+      );
   }
 }

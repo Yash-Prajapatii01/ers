@@ -6,6 +6,9 @@ class UdfOptionsModel {
   final String name;
   final Color? color;
   final bool? isSelected;
+  final String? performing;
+  final String? img;
+  final String? imgUrl;
 
   const UdfOptionsModel({
     this.editability,
@@ -13,6 +16,9 @@ class UdfOptionsModel {
     required this.name,
     this.color,
     this.isSelected,
+    this.performing,
+    this.img,
+    this.imgUrl
   });
 
   /// Helper that takes a raw string like "#FF8A80;0"
@@ -46,8 +52,11 @@ class UdfOptionsModel {
       editability: json['editability'] as int? ?? 0,
       id: json['id'] as int? ?? -1,
       name: json['name'] as String? ?? '',
-      isSelected: json['isSelected'] as bool? ?? false,
+      isSelected: json['is_selected'] ?? false,
       color: resolvedColor,
+      performing: json['performing'] as String?,
+      img: json['img'] as String?,
+      imgUrl: json['imgUrl'] as String?,
     );
   }
 }

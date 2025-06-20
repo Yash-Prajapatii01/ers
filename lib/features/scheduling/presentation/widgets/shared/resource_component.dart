@@ -1,3 +1,5 @@
+import 'package:ers_linux/features/scheduling/data/models/udfModel.dart';
+import 'package:ers_linux/features/scheduling/presentation/utils/TileInteractionHandleTap.dart';
 import 'package:ers_linux/features/scheduling/presentation/utils/showBottomSheet.dart';
 import 'package:ers_linux/features/scheduling/presentation/widgets/UnifiedContainerTile/unifiedContainerTile.dart';
 import 'package:ers_linux/shared/theme/app_colors.dart';
@@ -11,9 +13,19 @@ import '../UnifiedContainerTile/tile_interaction_type.dart';
 
 class ResourceSelector extends StatefulWidget {
   final void Function(String)? onValueChanged;
-  final bool isTasksFieldNeeded;
+  final void Function(String, dynamic)? onProjectValueChanged;
+  final bool showTaskField;
+  final UdfModel? ResourceProjectUdf;
+  final Map<String, List<UdfModel>>? originalFieldTypes;
 
-  const ResourceSelector({super.key, this.onValueChanged, required this.isTasksFieldNeeded});
+  const ResourceSelector({
+    super.key,
+    this.onValueChanged,
+    this.onProjectValueChanged,
+    this.showTaskField = false,
+    this.ResourceProjectUdf,
+    this.originalFieldTypes,
+  });
 
   @override
   State<ResourceSelector> createState() => _ResourceSelectorState();
@@ -22,24 +34,13 @@ class ResourceSelector extends StatefulWidget {
 class _ResourceSelectorState extends State<ResourceSelector> {
   String? selectedAvatarUrl;
   String? selectedName;
-  String? selectedRole;
-
-
-  final List<Resource> resources = [
-    Resource(name: 'Yash', designation: 'Flutter Developer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg'),
-    Resource(name: 'Albert', designation: 'Backend Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/2.jpg'),
-    Resource(name: 'Siyahi', designation: 'AI Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/3.jpg'),
-    Resource(name: 'Deep', designation: 'ML Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/4.jpg'),
-    Resource(name: 'Aye Dante', designation: 'Operation Head', imageUrl: 'https://xsgames.co/randomusers/avatar.php?g=male'),
-    Resource(name: 'Emilio', designation: 'Frontend Engineer', imageUrl: 'https://xsgames.co/randomusers/avatar.php?g=female'),
-    Resource(name: 'John', designation: 'Business Analyst Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/6.jpg'),
-    Resource(name: 'Dennis', designation: 'UI UX Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/7.jpg'),
-    Resource(name: 'Obama', designation: 'UI UX', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/8.jpg'),
-    Resource(name: 'Clinton', designation: 'ITya Engineer', imageUrl: 'https://xsgames.co/randomusers/assets/avatars/male/9.jpg'),
-  ];
+  int? selectedResourceId;
 
   @override
   Widget build(BuildContext context) {
+    final resourceUdfs = widget.originalFieldTypes?['RSRSS'] ?? [];
+    final projectUdfs = widget.originalFieldTypes?['PRJSS'] ?? [];
+    String projectResult = '';
     return Container(
       padding: const EdgeInsets.all(15.5),
       decoration: BoxDecoration(
@@ -66,7 +67,8 @@ class _ResourceSelectorState extends State<ResourceSelector> {
             children: [
               GestureDetector(
                 onTap:
-                    () => BottomSheetService.showCustomBottomSheet(
+                    () =>
+                    BottomSheetService.showCustomBottomSheet(
                       context: context,
                       child: BottomSheetOptions(
                         title: 'Resources',
@@ -74,18 +76,19 @@ class _ResourceSelectorState extends State<ResourceSelector> {
                         isDonethere: false,
                         SearchHintText: 'Search for Resources',
                         DDMS: false,
-                        resourceOptions: resources,
+                        udfModel: resourceUdfs.first,
                       ),
                       onSelected: (result) {
+                        print("Here in the RSRSS Selector");
                         if (result['type'] == 'resource') {
-                          Resource selected = result['resource'];
+                          ResourceModel selected = result['resource'];
                           setState(() {
                             selectedAvatarUrl = selected.imageUrl;
                             selectedName = selected.name;
-                            selectedRole = selected.designation;
+                            selectedResourceId = selected.id;
                           });
-                          // Use the resource object as needed
                         }
+                        widget.onValueChanged?.call(selectedResourceId.toString());
                       },
                     ),
                 child: CircleAvatar(
@@ -96,7 +99,6 @@ class _ResourceSelectorState extends State<ResourceSelector> {
                   ),
                 ),
               ),
-
               if (selectedAvatarUrl != null) ...[
                 SizedBox(width: 12.w),
                 Container(
@@ -119,54 +121,102 @@ class _ResourceSelectorState extends State<ResourceSelector> {
                           selectedName ?? '',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
+                            color: AppColors.selectedResourceName,
+                            fontSize: 12.sp,
                           ),
                         ),
-                        Text(
-                          selectedRole ?? '',
-                          style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Color.fromRGBO(165, 165, 165, 1),
-                              fontWeight: FontWeight.w400
-                          ),
-                        ),
+                        // Text(
+                        //   selectedRole ?? '',
+                        //   style: TextStyle(
+                        //     fontSize: 12.sp,
+                        //     color: Color.fromRGBO(165, 165, 165, 1),
+                        //     fontWeight: FontWeight.w400,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ],
                 ),
-              ]
+              ],
             ],
           ),
-          SizedBox(height: 16.h ),
-
-          // Project tile
+          SizedBox(height: 16.h),
           UnifiedContainerTile(
-            title: 'Project',
-            iconPath: 'projects',
-            interactionType: TileInteractionType.bottomSheet,
-            isRequired: true,
-            bottomSheetContent: BottomSheetOptions(
-              isSearchEnabled: true,
-              title: 'Projects',
-              showCheckboxes: false,
-              DDMS: true,
-              options: []
-            ),
-          ),
-          // Task tile
-          if(widget.isTasksFieldNeeded) ...[
-            SizedBox(height: 16.h),
-            UnifiedContainerTile(
-              title: 'Task',
-              iconPath: 'ddss',
+              title: 'Project',
+              itemText: projectResult,
+              iconPath: 'projects',
               interactionType: TileInteractionType.bottomSheet,
+              isRequired: true,
               bottomSheetContent: BottomSheetOptions(
-                  isSearchEnabled: true,
-                  title: 'Tasks',
-                  options: []
+                isSearchEnabled: true,
+                udfModel: projectUdfs.first,
+                title: 'Projects',
+                showCheckboxes: false,
+                DDMS: false,
+                isDonethere: false,
+                options: widget.ResourceProjectUdf!.udfOptionsList,
               ),
-            ),
-          ]
+              onOptionSelected: (value) {
+                //todo : project id not saving there as it should be;;;;
+                // widget.onValueChanged?.call(value);
+                widget.onProjectValueChanged?.call(projectUdfs.first.code, value);
+              },
+          ),
+          // GestureDetector(
+          //   onTap:
+          //       () => TileInteractionService.handle(
+          //         context,
+          //         projectUdfs.first,
+          //         TileInteractionType.bottomSheet,
+          //       ),
+          //   child: Container(
+          //     height: 44.w,
+          //     padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 9.h),
+          //     decoration: BoxDecoration(
+          //       borderRadius: BorderRadius.circular(8.r),
+          //       border: Border.all(
+          //         color: AppColors.bookingContainerTileBorder,
+          //         width: 0.5.w,
+          //       ),
+          //     ),
+          //     child: Column(
+          //       mainAxisSize: MainAxisSize.min,
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Row(
+          //           children: [
+          //             SvgPicture.asset(
+          //               'assets/icons/scheduling/booking/projects.svg',
+          //             ),
+          //             SizedBox(width: 8.w),
+          //             Expanded(
+          //               child: Text.rich(
+          //                 TextSpan(
+          //                   text: 'Project',
+          //                   style: TextStyle(
+          //                     fontSize: 14.sp,
+          //                     fontWeight: FontWeight.w400,
+          //                     color: AppColors.darkBlack,
+          //                   ),
+          //                   children:
+          //                       true
+          //                           ? [
+          //                             TextSpan(
+          //                               text: '*',
+          //                               style: TextStyle(color: Colors.red),
+          //                             ),
+          //                           ]
+          //                           : [],
+          //                 ),
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

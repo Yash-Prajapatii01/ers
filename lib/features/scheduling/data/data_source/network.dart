@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
+import 'package:injectable/injectable.dart';
 import '../models/booking_model.dart';
 
-
 // Remote Data Source
+
 abstract class BookingFormRemoteSource {
   Future<BookingModel> fetchBookingDetails(String token);
 }
 
+@LazySingleton(as: BookingFormRemoteSource)
 class BookingFormRemoteSourceImpl extends BookingFormRemoteSource {
   final http.Client client;
 
@@ -18,6 +20,7 @@ class BookingFormRemoteSourceImpl extends BookingFormRemoteSource {
   Future<BookingModel> fetchBookingDetails(String token) async {
     final uri = Uri.parse(
       'https://test.eresourcescheduler.cloud/rest/booking/profile?visibility=ADD',
+      // 'https://varun-pc.eresourcescheduler.cloud:8443/rest/booking/profile?visibility=',
     );
 
     final response = await client.get(
@@ -36,6 +39,7 @@ class BookingFormRemoteSourceImpl extends BookingFormRemoteSource {
       try {
         final jsonMap = json.decode(response.body) as Map<String, dynamic>;
         log('✅ JSON decoded successfully');
+        // print(jsonMap);
         return BookingModel.fromJson(jsonMap);
       } catch (e, stackTrace) {
         log('❌ Error parsing JSON: $e');

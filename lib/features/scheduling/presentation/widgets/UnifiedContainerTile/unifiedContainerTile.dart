@@ -1,9 +1,11 @@
 import 'package:ers_linux/features/scheduling/data/models/udfOptionsModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../shared/theme/app_colors.dart';
+import '../../utils/BookingFormBloc/booking_form_bloc.dart';
 import '../../utils/showBottomSheet.dart';
 import '../shared/CustomTextField.dart';
 import '../shared/PillText.dart';
@@ -56,13 +58,11 @@ class UnifiedContainerTile extends StatefulWidget {
 
   // For action callbacks
   final Function(String)? onOptionSelected;
-  final Function(List<int>)? onMultipleOptionsSelected;
+  final Function(List<dynamic>)? onMultipleOptionsSelected;
   final Function(double)? onSliderChanged;
   final Function(double)? onFieldFilled;
   final Function(String)? onDateSelected;
   final Function(DateTime)? onDateTimeSelected;
-
-  // final Function(String)? onTextChanged;
 
   const UnifiedContainerTile({
     super.key,
@@ -111,7 +111,6 @@ class UnifiedContainerTile extends StatefulWidget {
     this.onFieldFilled,
     this.onDateSelected,
     this.onDateTimeSelected,
-    // this.onTextChanged,
     this.fullSizeBottomSheet = false,
   });
 
@@ -274,11 +273,9 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
             //   }
             // },
             onSelected: (result) {
-              print("result -$result");
-              print(result.runtimeType);
+              print("result of  -$result");
               if (result is List<UdfOptionsModel>) {
                 setState(() {
-                  // Store the selected options
                   _selectedOptions = result;
 
                   if (result.isNotEmpty) {
@@ -286,29 +283,30 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
                     final extraCount = result.length - 1;
 
                     // Check what type of data the first item contains
-                    if (firstItem.color != Colors.transparent && firstItem.name.isNotEmpty) {
+                    if (firstItem.color != Colors.transparent &&
+                        firstItem.name.isNotEmpty) {
                       // Case: label-color (has both label and color)
                       selectedLabel = firstItem.name;
                       selectedColor = firstItem.color;
-                      _trailingText = extraCount > 0
-                          ? '${firstItem.name} +$extraCount'
-                          : firstItem.name;
-
-                    } else if (firstItem.color != Colors.transparent && (firstItem.name.isEmpty || firstItem.name == '')) {
+                      _trailingText =
+                          extraCount > 0
+                              ? '${firstItem.name} +$extraCount'
+                              : firstItem.name;
+                    } else if (firstItem.color != Colors.transparent &&
+                        (firstItem.name.isEmpty || firstItem.name == '')) {
                       // Case: color only (has color but no meaningful label)
                       selectedLabel = null;
                       selectedColor = firstItem.color;
-                      _trailingText = extraCount > 0
-                          ? 'Color +$extraCount'
-                          : '';
-
+                      _trailingText =
+                          extraCount > 0 ? 'Color +$extraCount' : '';
                     } else {
                       // Case: text only (has label/name but no color)
                       selectedLabel = null;
                       selectedColor = null;
-                      _trailingText = extraCount > 0
-                          ? '${firstItem.name} +$extraCount'
-                          : firstItem.name;
+                      _trailingText =
+                          extraCount > 0
+                              ? '${firstItem.name} +$extraCount'
+                              : firstItem.name;
                     }
 
                     // Extract IDs and call the callback
@@ -317,7 +315,6 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
 
                     // Also call single option callback with display text
                     widget.onOptionSelected?.call(_trailingText);
-
                   } else {
                     // No selections - reset everything
                     selectedLabel = null;
@@ -325,7 +322,8 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
                     _trailingText = '';
                     widget.onMultipleOptionsSelected?.call([]);
                   }
-                });}
+                });
+              }
               // ───────────────────────────────────────
               // 2. String Result Branch (MISSING)
               // ───────────────────────────────────────
@@ -345,31 +343,81 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
               // ───────────────────────────────────────
               if (result is Map<String, dynamic>) {
                 setState(() {
-                  print("Result is Map here....");
+                  print("Result is Map here.... ${result}");
                   // Example: { 'label': 'Priority A', 'color': Color(0xFF...), 'type': 'label-color' }
                   switch (result['type']) {
                     case 'label-color':
                       selectedLabel = result['label'] as String?;
                       selectedColor = result['color'] as Color?;
                       _trailingText = selectedLabel ?? '';
-                      widget.onOptionSelected?.call(_trailingText);
+                      widget.onOptionSelected?.call(result['id'].toString());
+                      break;
+                    case 'single-option':
+                      print("In the Single Option");
+                      final name = result['name'] as String;
+                      _trailingText = name;
+                      final id = result['id'] as int;
+                      print("Here the id is -> ${id}");
+                      print(id.runtimeType);
+                      _trailingText = name; // Show name in UI
+                      widget.onOptionSelected?.call(id.toString());
+
+                      // If you have a callback specifically for storing the ID, call it here
+                      // widget.onOptionIdSelected?.call(id);
+                      // OR store both name and id in your form data
+                      // widget.onOptionWithIdSelected?.call({'name': name, 'id': id});
+
+                      print('Single option selected - Name: $name, ID: $id');
                       break;
                     case 'color':
                       final colorVal = int.tryParse(result['color'] as String);
                       if (colorVal != null) {
                         selectedLabel = null;
                         selectedColor = Color(colorVal);
-                        _trailingText = ''; // You can decide how to render a pure color swatch
-                        widget.onOptionSelected?.call(selectedColor!.value.toString());
+                        _trailingText =
+                            ''; // You can decide how to render a pure color swatch
+                        widget.onOptionSelected?.call(
+                          selectedColor!.value.toString(),
+                        );
                       }
                       break;
                     case 'text':
+                      print('text case');
                       final textVal = result['text'] as String?;
                       if (textVal != null) {
                         selectedLabel = null;
                         selectedColor = null;
                         _trailingText = textVal;
                         widget.onOptionSelected?.call(textVal);
+                      }
+                      break;
+                    case 'udf':
+                      print('multi-ids case ');
+                      final selectedUdf =
+                          result['Udfselected'] as List<UdfOptionsModel>?;
+                      if (selectedUdf!.isNotEmpty) {
+                        final List<int> udfIds =
+                            selectedUdf.map((udf) => udf.id).toList();
+                        print('Extracted UDF IDs: $udfIds');
+                        final first = selectedUdf.first;
+                        final extra = selectedUdf.length - 1;
+                        result =
+                            extra > 0
+                                ? '${first.name} +$extra'
+                                : '${first.name}';
+                        _trailingText = result;
+                        widget.onMultipleOptionsSelected?.call(udfIds);
+                      }
+                      break;
+                    case 'name-only':
+                      final selectedNames = result['names'] as List<String>?;
+                      print(selectedNames);
+                      if (selectedNames != null && selectedNames.isNotEmpty) {
+                        final first = selectedNames.first;
+                        final extra = selectedNames.length - 1;
+                        result = extra > 0 ? '$first +$extra' : '$first';
+                        _trailingText = result;
+                        widget.onMultipleOptionsSelected?.call(selectedNames);
                       }
                       break;
                     default:

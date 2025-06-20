@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 typedef OptionSelectCallback = void Function(String name, int id);
 
-class UdfOptionWidgetProvider {
+class UdfOptionProvider {
   static Future<Widget> provide({
     required BuildContext context,
     required String fieldType,
@@ -51,13 +51,6 @@ class UdfOptionWidgetProvider {
             );
           }
         },
-        //   if (udfOptionsList != null && udfOptionsList.isNotEmpty) {
-        //     context.read<BookingChartBloc>().add(LoadStaticOptionsEvent(options: udfOptionsList!));
-        //     return _buildStaticList(context, udfOptionsList, onSelect);
-        //   } else {
-        //     return _buildSearchableList(context, fieldType, onSelect, projectId);
-        //   }
-        // },
       ),
     );
   }
@@ -72,7 +65,7 @@ class UdfOptionWidgetProvider {
       itemBuilder: (context, idx) {
         final option = options[idx];
         return ListTile(
-          title: Text("Here i am - ${option.name}"),
+          title: Text("Tile tapped without n/w call - ${option.name}"),
           onTap: () {
             Navigator.pop(context);
             onSelect(option.name, option.id);
@@ -115,9 +108,6 @@ class _DebouncedSearchListState extends State<_DebouncedSearchList> {
   final TextEditingController _searchController = TextEditingController();
   final Duration debounceDuration = const Duration(milliseconds: 400);
   Timer? _debounce;
-  List<UdfOptionsModel> _results = [];
-  bool _loading = false;
-
   void _onSearchChanged() {
     final query = _searchController.text.trim();
     context.read<BookingFormBloc>().add(
@@ -172,7 +162,7 @@ class _DebouncedSearchListState extends State<_DebouncedSearchList> {
                     return ListTile(
                       title: Text(item.name),
                       onTap: () {
-                        print('here in this tile tapped ${item.name}');
+                        print('Tile Tapped in n/w call - ${item.name}');
                         Navigator.pop(context);
                         widget.onSelect(item.name, item.id);
                       },

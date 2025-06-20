@@ -1,4 +1,4 @@
-import 'package:ers_linux/features/auth/injection.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,13 +23,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loginController = TextEditingController();
 
-    return BlocProvider(
-      create:
-          (_) => AuthenticationBloc(
-            initialState: const ForgotPasswordState(),
-            supabaseClient: getIt<SupabaseClient>(),
-          ),
-      child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
+    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
         builder: (context, state) {
           final forgotPassState =
               state is ForgotPasswordState
@@ -151,7 +145,6 @@ class ForgotPasswordScreen extends StatelessWidget {
             context.push(OtpVerification.routePath, extra: state.email);
           }
         },
-      ),
-    );
+      );
   }
 }

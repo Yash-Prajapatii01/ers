@@ -1,10 +1,11 @@
-import 'package:ers_linux/features/auth/injection.dart';
+import 'package:ers_linux/features/scheduling/presentation/utils/BookingFormBloc/booking_form_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/config/service_locator.dart';
 import 'core/config/router.dart';
 import 'shared/theme/theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -20,8 +21,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await configureDependencies();
-  // setupLocator();
+  await setupAllLocators();
   runApp(const MyApp());
 }
 
@@ -38,11 +38,10 @@ class MyApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider<AuthenticationBloc>(
-              create:
-                  (_) => AuthenticationBloc(
-                    supabaseClient: getIt<SupabaseClient>(),
-                  ),
-              // why we were using the getIt<AuthenticationBloc>(),
+              create: (_) =>  getIt<AuthenticationBloc>(),
+            ),
+            BlocProvider<BookingFormBloc>(
+              create: (_) => getIt<BookingFormBloc>(),
             ),
           ],
           child: MaterialApp.router(

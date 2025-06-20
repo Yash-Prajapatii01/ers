@@ -241,6 +241,7 @@ class DDMSSelectableList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(options);
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

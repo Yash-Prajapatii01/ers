@@ -87,60 +87,59 @@ class _CustomTextFieldState extends State<CustomTextField> {
               return 'Invalid input format';
             }
           }
-
-          return null; // ✅ All good
+          return null;
         },
-
+        autovalidateMode: AutovalidateMode.always,
         style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w400),
-      controller: _controller,
-      inputFormatters: widget.inputFormatters,
-      obscureText: widget.obscureText,
-      keyboardType: widget.keyboardType,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      textInputAction: widget.textInputAction,
-      maxLines: widget.maxLines,
-      minLines: widget.minLines,
-      decoration:
-      (widget.decoration ??
-          InputDecoration(
-            hintText: widget.hintText,
-            hintStyle: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w400,
-            ),
-            suffixIcon:
-            _controller.text.isNotEmpty
-                ? GestureDetector(
-              onTap:
-                  () =>
-                  setState(() {
-                    _controller.clear();
-                    widget.onChanged?.call('');
-                  }),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SvgPicture.asset(
-                  'assets/icons/scheduling/booking/close.svg',
-                  width: 16.w,
-                  height: 16.h,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            )
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 14.w,
-              vertical: 11.5.h,
-            ),
-          )),
-      onChanged: (value) {
-        setState(() {});
-        widget.onChanged?.call(value);
-      },
-    ),);
+        controller: _controller,
+        inputFormatters: widget.inputFormatters,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        textInputAction: widget.textInputAction,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        decoration:
+            (widget.decoration ??
+                InputDecoration(
+                  hintText: widget.hintText,
+                  hintStyle: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  suffixIcon:
+                      _controller.text.isNotEmpty
+                          ? GestureDetector(
+                            onTap:
+                                () => setState(() {
+                                  _controller.clear();
+                                  widget.onChanged?.call('');
+                                }),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SvgPicture.asset(
+                                'assets/icons/scheduling/booking/close.svg',
+                                width: 16.w,
+                                height: 16.h,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          )
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 11.5.h,
+                  ),
+                )),
+        onChanged: (value) {
+          setState(() {});
+          widget.onChanged?.call(value);
+        },
+      ),
+    );
   }
 }

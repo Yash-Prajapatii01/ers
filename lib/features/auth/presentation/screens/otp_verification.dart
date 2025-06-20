@@ -176,7 +176,7 @@
 //   }
 // }
 
-import 'package:ers_linux/features/auth/injection.dart';
+
 import 'package:ers_linux/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ers_linux/features/auth/presentation/screens/login_screen.dart';
 import 'package:ers_linux/features/auth/presentation/screens/set_new_password.dart';
@@ -208,11 +208,7 @@ class OtpVerification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<AuthenticationBloc>(
-        param1: OtpVerificationState(),
-      ),
-      child: BlocListener<AuthenticationBloc, AuthenticationState>(
+    return  BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is OtpVerificationState) {
             switch (state.status) {
@@ -374,7 +370,6 @@ class OtpVerification extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
