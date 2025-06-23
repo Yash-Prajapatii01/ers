@@ -47,26 +47,29 @@ class _UdfTileBuilderState extends State<UdfTileBuilder>
     _urlController.dispose();
     super.dispose();
   }
+
   String parseColorFromString(String colorString) {
     // Parse the decimal string to an integer
     int colorValue = int.parse(colorString);
 
     // Extract ARGB components
     int alpha = (colorValue >> 24) & 0xFF;
-    int red   = (colorValue >> 16) & 0xFF;
+    int red = (colorValue >> 16) & 0xFF;
     int green = (colorValue >> 8) & 0xFF;
-    int blue  = colorValue & 0xFF;
+    int blue = colorValue & 0xFF;
 
     // Format RGB as hex, alpha as normalized float
-    String hex = '#${red.toRadixString(16).padLeft(2, '0').toUpperCase()}'
+    String hex =
+        '#${red.toRadixString(16).padLeft(2, '0').toUpperCase()}'
         '${green.toRadixString(16).padLeft(2, '0').toUpperCase()}'
         '${blue.toRadixString(16).padLeft(2, '0').toUpperCase()}';
 
-    String alphaFloat = (alpha / 255).toStringAsFixed(0); // No decimals since you wanted `;1`
+    String alphaFloat = (alpha / 255).toStringAsFixed(
+      0,
+    ); // No decimals since you wanted `;1`
 
     return '$hex;$alphaFloat';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,52 +142,6 @@ class _UdfTileBuilderState extends State<UdfTileBuilder>
           },
         );
 
-      // case 'DATIM':
-      //   if (udf.code == 'start_time') {
-      //     return UnifiedCalendar(
-      //       initialDate: DateTime.now(),
-      //       isRangePicker: true,
-      //       showTime: true,
-      //       initialFromTime: const TimeOfDay(hour: 9, minute: 0),
-      //       repeatOptions: [
-      //         'None',
-      //         'Daily',
-      //         'Weekly',
-      //         'Monthly',
-      //         'Yearly',
-      //         'Custom',
-      //       ],
-      //       onRepeatSelected: (value) {
-      //         if (value == 'Custom') {
-      //           BottomSheetService.showCustomBottomSheet(
-      //             context: context,
-      //             child: BottomSheetOptions(
-      //               title: 'Custom',
-      //               unifiedcontainercontent: Column(children: [CustomMenu()]),
-      //             ),
-      //           );
-      //         }
-      //       },
-      //       onDateSelected: (value) {
-      //         widget.onValueChanged?.call(udf.code, value);
-      //       },
-      //     );
-      //   }
-      //   if (udf.code == 'end_time') {
-      //     return SizedBox.shrink();
-      //   } else {
-      //     return UnifiedContainerTile(
-      //       title: udf.displayName,
-      //       iconPath: 'date',
-      //       interactionType: TileInteractionType.bottomSheet,
-      //       fullSizeBottomSheet: true,
-      //       bottomSheetContent: BottomSheetOptions(
-      //         title: udf.displayName,
-      //         isDateWidget: true,
-      //         isTimeWidget: true,
-      //       ),
-      //     );
-      //   }
       case 'DATIM':
         if (udf.code == 'start_time') {
           return UnifiedCalendar(
@@ -269,8 +226,22 @@ class _UdfTileBuilderState extends State<UdfTileBuilder>
           isPinTextNeeded: true,
           popMenuOptions: ['% Capacity', 'Hours', 'FTE'],
           onOptionSelected: (value) {
+            Map<String, int> changer = {'% Capacity': 1, 'Hours': 2, 'FTE': 4};
             print("UdfTile -> $value");
-            widget.onValueChanged?.call(udf.code, value);
+            final numValue = num.tryParse(value);
+
+            if (numValue != null) {
+              // Value is numeric (as a string), pass it as string
+              print('In the numeric string case');
+              widget.onValueChanged?.call(udf.code, value);
+            } else if (changer.containsKey(value)) {
+              // Value is a recognized unit option
+              print('In the unit string case');
+              widget.onValueChanged?.call('unit', changer[value].toString());
+            } else {
+              // Unknown string value
+              print('Unexpected value: $value');
+            }
           },
         );
 
@@ -521,8 +492,6 @@ class _UdfTileBuilderState extends State<UdfTileBuilder>
             widget.onValueChanged?.call(udf.code, parseColorFromString(value));
           },
         );
-
-      ///here we have to add the priority bar
       case 'LABL':
         return UnifiedContainerTile(
           title: udf.displayName,

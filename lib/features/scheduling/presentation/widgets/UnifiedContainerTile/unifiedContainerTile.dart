@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../shared/theme/app_colors.dart';
+import '../../../data/models/udfModel.dart';
 import '../../utils/BookingFormBloc/booking_form_bloc.dart';
 import '../../utils/showBottomSheet.dart';
 import '../shared/CustomTextField.dart';
@@ -550,6 +551,7 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
 
     if (choice != null && choice != _selectedOption) {
       setState(() {
+        print("Hello ji ");
         _selectedOption = choice;
       });
       if (widget.onOptionSelected != null) {
@@ -730,9 +732,10 @@ class _UnifiedContainerTileState extends State<UnifiedContainerTile> {
                       onSelected: (result) {
                         if (result is Map<String, dynamic>) {
                           setState(() {
-                            // For example, handle submitted effort
+                            print("Here the result is -> ${result}");
                             if (result['text'] != null) {
                               _effortController.text = result['text'];
+                              widget.onOptionSelected?.call(result['text']);
                             }
                           });
                         }

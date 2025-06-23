@@ -20,7 +20,7 @@ class BookingFormRemoteSourceImpl extends BookingFormRemoteSource {
   Future<BookingModel> fetchBookingDetails(String token) async {
     final uri = Uri.parse(
       'https://test.eresourcescheduler.cloud/rest/booking/profile?visibility=ADD',
-      // 'https://varun-pc.eresourcescheduler.cloud:8443/rest/booking/profile?visibility=',
+      // 'https://varun-pc.eresourcescheduler.cloud:8443/rest/booking/profile?visibility=ADD',
     );
 
     final response = await client.get(

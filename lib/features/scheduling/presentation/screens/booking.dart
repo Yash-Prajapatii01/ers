@@ -1,9 +1,13 @@
 import 'dart:convert';
+
 import 'package:ers_linux/features/scheduling/data/models/sections.dart';
 import 'package:ers_linux/shared/theme/app_colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+import '../../data/data_source/apiResponse.dart';
 import '../../data/models/udfModel.dart';
 import '../utils/BookingFormBloc/booking_form_bloc.dart';
 import '../widgets/UdfTileBuider.dart';
@@ -39,20 +43,410 @@ class _BookingFormState extends State<BookingForm> {
 
   final Map<String, FieldValueType> _fieldTypeRegistry = {};
   final Map<String, dynamic> _formData = {};
+  final Map<String, bool> _requiredFields = {};
+  final Map<String, String> _validationErrors = {};
 
   void _onUdfChanged(String code, dynamic value) {
     setState(() {
-      _formData[code] = value;
+      // Convert the value to the expected type before storing
+      dynamic convertedValue = _convertValueToExpectedType(code, value);
+      _formData[code] = convertedValue;
+
+      // Clear validation error when user updates the field
+      _validationErrors.remove(code);
+
+      if (value != convertedValue) {
+        print(
+          'Converted field $code: $value -> $convertedValue (${convertedValue.runtimeType})',
+        );
+      }
     });
+  }
+
+  dynamic _convertValueToExpectedType(String fieldCode, dynamic value) {
+    print('Converting value for field $fieldCode: $value');
+    FieldValueType expectedType =
+        _fieldTypeRegistry[fieldCode] ?? FieldValueType.unknown;
+    print('Expected type for field $fieldCode: $expectedType');
+    if (expectedType == FieldValueType.unknown) {
+      print('🚨 Unknown field type for $fieldCode. Value: $value');
+    }
+    if (value == null) return null;
+
+    try {
+      switch (expectedType) {
+        case FieldValueType.string:
+          return value.toString();
+
+        case FieldValueType.integer:
+          if (value is int) return value;
+          if (value is double) return value.toInt();
+          if (value is String) {
+            if (value.trim().isEmpty) return 0;
+            return int.parse(value);
+          }
+          return 0;
+
+        case FieldValueType.doubleType:
+          if (value is double) return value;
+          if (value is int) return value.toDouble();
+          if (value is String) {
+            if (value.trim().isEmpty) return 0.0;
+            return double.parse(value);
+          }
+          return 0.0;
+
+        case FieldValueType.boolean:
+          if (value is bool) return value;
+          if (value is String) {
+            String lowerValue = value.toLowerCase().trim();
+            return lowerValue == 'true' ||
+                lowerValue == '1' ||
+                lowerValue == 'yes';
+          }
+          if (value is int) return value != 0;
+          return false;
+
+        case FieldValueType.stringList:
+          if (value is List<String>) return value;
+          if (value is List)
+            return value.map((item) => item.toString()).toList();
+          if (value is String) {
+            // Handle comma-separated strings
+            return value
+                .split(',')
+                .map((item) => item.trim())
+                .where((item) => item.isNotEmpty)
+                .toList();
+          }
+          return <String>[];
+
+        case FieldValueType.intList:
+          if (value is List<int>) return value;
+          if (value is List) {
+            return value.map((item) {
+              if (item is int) return item;
+              if (item is String) return int.parse(item);
+              if (item is double) return item.toInt();
+              return 0;
+            }).toList();
+          }
+          if (value is String) {
+            // Handle comma-separated strings of numbers
+            return value
+                .split(',')
+                .map((item) => item.trim())
+                .where((item) => item.isNotEmpty)
+                .map((item) => int.parse(item))
+                .toList();
+          }
+          return <int>[];
+
+        case FieldValueType.datetime:
+          return value;
+
+        default:
+          return value;
+      }
+    } catch (e) {
+      print('Error converting value for field $fieldCode: $e');
+      // Return a safe default based on the expected type
+      switch (expectedType) {
+        case FieldValueType.string:
+          return '';
+        case FieldValueType.integer:
+          return 0;
+        case FieldValueType.doubleType:
+          return 0.0;
+        case FieldValueType.boolean:
+          return false;
+        case FieldValueType.stringList:
+          return <String>[];
+        case FieldValueType.intList:
+          return <int>[];
+        case FieldValueType.datetime:
+          return null;
+        default:
+          return null;
+      }
+    }
   }
 
   void _onSavePressed() {
     print('On save Pressed....');
-    print(_formData);
+
+    // Validate required fields
+    if (_validateRequiredFields()) {
+      print('Validation passed');
+      print(_formData);
+      // Proceed with save operation
+      _performSave();
+    } else {
+      print('Validation failed');
+      print('Validation errors: $_validationErrors');
+      // Show error dialog or snackbar
+      _showValidationErrors();
+    }
+  }
+
+  bool _validateRequiredFields() {
+    _validationErrors.clear();
+    bool isValid = true;
+
+    for (String fieldCode in _requiredFields.keys) {
+      if (_requiredFields[fieldCode] == true) {
+        dynamic value = _formData[fieldCode];
+        FieldValueType fieldType =
+            _fieldTypeRegistry[fieldCode] ?? FieldValueType.unknown;
+
+        // Check if field is empty
+        if (_isFieldEmpty(value, fieldType)) {
+          _validationErrors[fieldCode] = 'This field is required';
+          isValid = false;
+        } else {
+          // Additional type validation
+          if (!_isValueValidForType(value, fieldType)) {
+            _validationErrors[fieldCode] = 'Invalid data format for this field';
+            isValid = false;
+          }
+        }
+      }
+    }
+
+    return isValid;
+  }
+
+  bool _isValueValidForType(dynamic value, FieldValueType fieldType) {
+    if (value == null) return true; // null is handled in _isFieldEmpty
+
+    switch (fieldType) {
+      case FieldValueType.string:
+        return value is String;
+      case FieldValueType.integer:
+        return value is int;
+      case FieldValueType.doubleType:
+        return value is double;
+      case FieldValueType.boolean:
+        return value is bool;
+      case FieldValueType.stringList:
+        return value is List<String>;
+      case FieldValueType.intList:
+        return value is List<int>;
+      case FieldValueType.datetime:
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  bool _isFieldEmpty(dynamic value, FieldValueType fieldType) {
+    switch (fieldType) {
+      case FieldValueType.string:
+        return value == null || value.toString().trim().isEmpty;
+      case FieldValueType.integer:
+      case FieldValueType.doubleType:
+        return value == null || value == 0;
+      case FieldValueType.boolean:
+        return value == null || value == false;
+      case FieldValueType.stringList:
+      case FieldValueType.intList:
+        return value == null || (value is List && value.isEmpty);
+      case FieldValueType.datetime:
+        return value == null;
+      default:
+        return value == null;
+    }
+  }
+
+  void _showValidationErrors() {
+    String errorMessage = 'Please fill in the following required fields:\n\n';
+    _validationErrors.forEach((fieldCode, error) {
+      errorMessage += '• $fieldCode: $error\n';
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(
+            'Required Fields Missing',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          ),
+          content: Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              errorMessage.trim(),
+              style: TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.error,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Map<String, dynamic> _removeEmptyNonRequiredFields(Map<String, dynamic> data) {
+    Map<String, dynamic> cleanedData = {};
+
+    data.forEach((fieldCode, value) {
+      // Check if field is required
+      bool isRequired = _requiredFields[fieldCode] ?? false;
+
+      if (isRequired) {
+        // Always include required fields (even if empty - validation will catch this)
+        cleanedData[fieldCode] = value;
+      } else {
+        // For non-required fields, check if they should be excluded
+        bool shouldExclude = false;
+
+        // Check for null values
+        if (value == null) {
+          shouldExclude = true;
+        }
+        // Check for empty strings
+        else if (value is String && value.trim().isEmpty) {
+          shouldExclude = true;
+        }
+        // Check for integer 0 values
+        else if (value is int && value == 0) {
+          shouldExclude = true;
+        }
+        // Check for double 0.0 values
+        else if (value is double && value == 0.0) {
+          shouldExclude = true;
+        }
+        // Check for empty lists
+        else if (value is List && value.isEmpty) {
+          shouldExclude = true;
+        }
+
+        if (shouldExclude) {
+          print('Removing empty non-required field: $fieldCode with value: $value');
+        } else {
+          cleanedData[fieldCode] = value;
+        }
+      }
+    });
+
+    return cleanedData;
+  }
+
+  void _convertAllFormData() {
+    Map<String, dynamic> convertedData = {};
+
+    _formData.forEach((fieldCode, value) {
+      convertedData[fieldCode] = _convertValueToExpectedType(fieldCode, value);
+    });
+
+    setState(() {
+      _formData.clear();
+      _formData.addAll(convertedData);
+    });
+  }
+
+  void _performSave() {
+    print('Performing save operation...');
+    _convertAllFormData();
+
+    // Remove empty non-required fields before submitting
+    Map<String, dynamic> cleanedFormData = _removeEmptyNonRequiredFields(
+      _formData,
+    );
+    print('Form data before cleaning: $_formData');
+    print('Form data after cleaning: $cleanedFormData');
+
+    // final response = _submitFormData(cleanedFormData);
+    // print("Response: $response");
+  }
+
+  Future<ApiResponse> _submitFormData([
+    Map<String, dynamic>? dataToSubmit,
+  ]) async {
+    const String apiUrl =
+        'https://test.eresourcescheduler.cloud/rest/bookingchart';
+    // const String apiUrl = 'https://varun-pc.eresourcescheduler.cloud:8443/rest/bookingchart';
+
+    try {
+      // Use provided data or fall back to _formData
+      final Map<String, dynamic> submissionData = dataToSubmit ?? _formData;
+
+      print('Submitting data to API...');
+      print('Request body: ${jsonEncode(dataToSubmit)}');
+
+      // Make the HTTP POST request
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(dataToSubmit),
+      );
+
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // Handle the response
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        // Success response
+        dynamic responseData;
+        try {
+          responseData = jsonDecode(response.body);
+        } catch (e) {
+          responseData = response.body;
+        }
+
+        return ApiResponse(
+          success: true,
+          message: 'Form submitted successfully',
+          data: responseData,
+          statusCode: response.statusCode,
+        );
+      } else {
+        // Error response
+        String errorMessage = 'Failed to submit form';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['message'] ?? errorMessage;
+        } catch (e) {
+          errorMessage =
+              response.body.isNotEmpty ? response.body : errorMessage;
+        }
+
+        return ApiResponse(
+          success: false,
+          message: errorMessage,
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      print('Error submitting form: $e');
+      return ApiResponse(
+        success: false,
+        message: 'Network error: ${e.toString()}',
+        statusCode: 0,
+      );
+    }
   }
 
   void _registerFieldExpectation(String code, String fieldType) {
-    switch (fieldType) {
+    final normalized = fieldType.toUpperCase().trim();
+
+    switch (normalized) {
       case 'TEXT':
       case 'MLTEXT':
       case 'EMAIL':
@@ -60,9 +454,17 @@ class _BookingFormState extends State<BookingForm> {
       case 'COLPICK':
         _fieldTypeRegistry[code] = FieldValueType.string;
         break;
+      case 'DDSS':
       case 'INT':
       case 'EFFORT':
       case 'REQSS':
+      case 'RSRSS':
+      case 'PRJSS':
+      case 'TSKSS':
+      case 'ROLEPS':
+      case 'LABL':
+      case 'RDGRP':
+      case 'USS':
         _fieldTypeRegistry[code] = FieldValueType.integer;
         break;
       case 'FLOAT':
@@ -83,23 +485,21 @@ class _BookingFormState extends State<BookingForm> {
       case 'DATIM':
         _fieldTypeRegistry[code] = FieldValueType.datetime;
         break;
-      case 'DDSS':
-      case 'RDGRP':
-      case 'USS':
-      case 'LABL':
-        _fieldTypeRegistry[code] = FieldValueType.string;
-        break;
       default:
+        print('Unknown field type encountered: $fieldType for $code');
         _fieldTypeRegistry[code] = FieldValueType.unknown;
     }
   }
-
 
   void _initializeFormData(List<SectionModel> sections) {
     print("Form Data initialization start");
     for (var section in sections) {
       for (var udf in section.udfs) {
         _registerFieldExpectation(udf.code, udf.fieldType);
+
+        // Register if field is required
+        _requiredFields[udf.code] = udf.isRequired ?? false;
+
         switch (udf.fieldType) {
           case 'DDMS':
           case 'CHGRP':
@@ -130,16 +530,14 @@ class _BookingFormState extends State<BookingForm> {
           case 'RDGRP':
           case 'USS':
           case 'LABL':
-
             _formData[udf.code] = 0;
             break;
           case 'TAGS':
             _formData[udf.code] = <String>[];
+            break;
           default:
             _formData[udf.code] = null;
         }
-
-        // Then override with selected values if they exist
         if (udf.udfOptionsList.isNotEmpty) {
           final selected =
               udf.udfOptionsList.where((v) => v.isSelected == true).toList();
@@ -152,9 +550,28 @@ class _BookingFormState extends State<BookingForm> {
             }
           }
         }
+
+        const String hiddenFieldCode = 'unit';
+        _fieldTypeRegistry[hiddenFieldCode] = FieldValueType.integer;
+        _requiredFields[hiddenFieldCode] = true;
+        _formData[hiddenFieldCode] = 0;
       }
     }
     print("Form Data filled up: $_formData");
+  }
+
+  bool hasValidationError(String fieldCode) {
+    return _validationErrors.containsKey(fieldCode);
+  }
+
+  String? getValidationError(String fieldCode) {
+    return _validationErrors[fieldCode];
+  }
+
+  void clearValidationErrors() {
+    setState(() {
+      _validationErrors.clear();
+    });
   }
 
   @override

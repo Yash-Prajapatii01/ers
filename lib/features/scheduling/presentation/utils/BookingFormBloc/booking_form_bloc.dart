@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
 
 import '../../../data/data_source/network.dart';
 import '../../../data/models/sections.dart';
-import '../../../data/services/SectionRetrivalService.dart';
 import '../SearchService.dart';
 
 part 'booking_form_event.dart';
@@ -47,7 +46,7 @@ class BookingFormBloc extends Bloc<BookingFormEvent, BookingFormState> {
                           if (udf.fieldType == 'TSKSS') {
                             return udf.copyWith(
                               udfOptionsList: options,
-                            );
+                            ); // update only TSKSS
                           } else {
                             return udf;
                           }
